@@ -2,6 +2,7 @@
 
 import { FC, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client"; // Importamos Supabase desde utils
+import { DataTable } from "@/components/DataTable";
 
 const ClientesView: FC = () => {
     const [clientes, setClientes] = useState([]);
@@ -19,14 +20,15 @@ const ClientesView: FC = () => {
 
     return (
         <div>
-            <h1>Lista de Clientes</h1>
-            <ul>
+            <h1 className="text-2xl font-bold ms-5">Clientes</h1>
+            <DataTable />
+            {/* <ul>
                 {clientes.map((cliente) => (
                     <li key={cliente.id}>
                         {cliente.nombre} {cliente.apellidos} - {cliente.email}
                     </li>
                 ))}
-            </ul>
+            </ul> */}
         </div>
     );
 };
