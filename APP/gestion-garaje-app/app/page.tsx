@@ -1,9 +1,9 @@
 import ClientesView from "./clientes/page";
 
-export default async function Home() {
+export default async function Inicio() {
     return (
         <>
-            <p>Gestion Garaje APP</p>
+            <p>Pantalla de Inicio!</p>
         </>
     );
 }
