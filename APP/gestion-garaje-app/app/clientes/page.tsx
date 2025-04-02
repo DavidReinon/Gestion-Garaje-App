@@ -7,15 +7,15 @@ const ClientesView: FC = () => {
     const [clientes, setClientes] = useState([]);
     const supabase = createClient(); // Creamos una instancia de Supabase
 
-    useEffect(() => {
-        const fetchClientes = async () => {
-            const { data, error } = await supabase.from("clientes").select("*");
-            if (error) console.error("Error al obtener clientes:", error);
-            else setClientes(data);
-        };
+    // useEffect(() => {
+    //     const fetchClientes = async () => {
+    //         const { data, error } = await supabase.from("clientes").select("*");
+    //         if (error) console.error("Error al obtener clientes:", error);
+    //         else setClientes(data);
+    //     };
 
-        fetchClientes();
-    }, []);
+    //     fetchClientes();
+    // }, []);
 
     return (
         <div>
