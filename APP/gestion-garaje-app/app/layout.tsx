@@ -41,9 +41,9 @@ export default function RootLayout({
                 >
                     <SidebarProvider>
                         <AppSidebar />
-                        <div className="flex flex-col min-h-screen mt-2">
+                        <div className="flex flex-col w-full min-h-screen mt-2">
                             <SidebarTrigger />
-                            <main className="m-2">{children}</main>
+                            <main className="">{children}</main>
                         </div>
                     </SidebarProvider>
                 </ThemeProvider>
