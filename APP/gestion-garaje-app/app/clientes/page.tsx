@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client"; // Importamos Supabase desde utils
 import { DataTable } from "@/components/data-table";
 import { columns } from "./domain/columns";
-import { Tables } from "@/utils/types/supabase";
+import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
 
 const ClientesView: FC = () => {
     type Cliente = Tables<"clientes"> & {
@@ -13,33 +13,37 @@ const ClientesView: FC = () => {
     };
 
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const supabase = createClient(); // Creamos una instancia de Supabase
+    const [loading, setLoading] = useState<boolean>(true);
+    const supabase = createClient();
 
     useEffect(() => {
         const fetchClientes = async () => {
+            setLoading(true);
             const { data, error } = await supabase.from("clientes")
                 .select(`*, coches (
                     marca, modelo, matricula)`); // Hacemos el JOIN con coches
 
             if (error) {
                 console.error("Error al obtener clientes:", error);
-                return; // Salimos de la función si hay un error
+                setLoading(false);
+                return;
             }
 
             console.log(data);
             const clientesConCoche = data.map((cliente) => ({
                 ...cliente,
                 coche: cliente.coches
-                    ? `${cliente.coches.marca} ${cliente.coches.modelo}`
+                    ? `${cliente.coches[0]?.marca} ${cliente.coches[0]?.modelo}`
                     : "-",
-                matricula: cliente.coches,
+                matricula: cliente.coches[0]?.matricula || "-",
             }));
 
             setClientes(clientesConCoche);
+            setLoading(false);
         };
 
         fetchClientes();
-    }, []);
+    }, [supabase]); // Se ejecutará al montar el componente, igual que sin dependencias '[]'
 
     const clientesDatosPrueba: Cliente[] = [
         {
@@ -51,7 +55,6 @@ const ClientesView: FC = () => {
             direccion: "Calle Falsa 123",
             fecha_entrada: "2024-03-01",
             fecha_salida: null,
-            fecha_registro_bd: "2024-03-01T12:00:00Z",
             coche: "Toyota Corolla",
             matricula: "1234-ABC",
         },
@@ -64,7 +67,6 @@ const ClientesView: FC = () => {
             direccion: "Av. del Garaje 45",
             fecha_entrada: "2024-02-10",
             fecha_salida: "2024-03-01",
-            fecha_registro_bd: "2024-02-10T10:30:00Z",
             coche: "Honda Civic",
             matricula: "5678-DEF",
         },
@@ -77,7 +79,6 @@ const ClientesView: FC = () => {
             direccion: "Av. del Garaje 46",
             fecha_entrada: "2024-02-15",
             fecha_salida: "2024-03-05",
-            fecha_registro_bd: "2024-02-15T11:00:00Z",
             coche: "Ford Focus",
             matricula: "9101-GHI",
         },
@@ -90,18 +91,30 @@ const ClientesView: FC = () => {
             direccion: "Av. del Garaje 47",
             fecha_entrada: "2024-02-20",
             fecha_salida: "2024-03-10",
-            fecha_registro_bd: "2024-02-20T12:30:00Z",
             coche: "Volkswagen Golf",
             matricula: "1121-JKL",
         },
     ];
 
     return (
-        <div className="flex justify-center ms-5 w-full">
+        <div className="flex justify-center ms-5 mt-10 w-full">
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
-                <h1 className="text-2xl font-bold mb-3">Lista de Clientes</h1>
-                {/* Contenedor para hacer la tabla scrollable */}
-                <DataTable columns={columns} data={clientes} />
+                <h1 className="text-2xl font-bold mb-2">Lista de Clientes</h1>
+                <p className="text-sm text-gray-500 mb-5">
+                    Aquí puedes ver la lista de clientes y sus coches.
+                </p>
+                <div className="flex justify-start mb-3">
+                    <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                        Añadir
+                    </button>
+                </div>
+                {loading ? (
+                    <div className="flex justify-center items-center h-20">
+                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
+                    </div>
+                ) : (
+                    <DataTable columns={columns} data={clientes} />
+                )}
             </div>
         </div>
     );
