@@ -100,7 +100,7 @@ const ClientesView: FC = () => {
         <div className="flex justify-center ms-5 mt-10 w-full">
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
                 <h1 className="text-2xl font-bold mb-2">Lista de Clientes</h1>
-                <p className="text-sm text-gray-500 mb-5">
+                <p className="text-sm text-gray-500 mb-3">
                     Aquí puedes ver la lista de clientes y sus coches.
                 </p>
                 <div className="flex justify-start mb-3">
