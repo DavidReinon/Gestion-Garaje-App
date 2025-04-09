@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client"; // Importamos Supabase d
 import { DataTable } from "@/components/data-table";
 import { columns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
+import { useRouter } from "next/navigation";
 
 const ClientesView: FC = () => {
     type Cliente = Tables<"clientes"> & {
@@ -14,7 +15,9 @@ const ClientesView: FC = () => {
 
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    
     const supabase = createClient();
+    const router = useRouter();
 
     useEffect(() => {
         const fetchClientes = async () => {
@@ -104,7 +107,10 @@ const ClientesView: FC = () => {
                     Aquí puedes ver la lista de clientes y sus coches.
                 </p>
                 <div className="flex justify-start mb-3">
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <button
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        onClick={() => router.push("clientes/crear")}
+                    >
                         Añadir
                     </button>
                 </div>
