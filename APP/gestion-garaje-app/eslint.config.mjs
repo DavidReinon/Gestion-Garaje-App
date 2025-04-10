@@ -15,6 +15,10 @@ const eslintConfig = [
         rules: {
             eqeqeq: "warn",
             "@typescript-eslint/no-unused-vars": ["warn"],
+            "@typescript-eslint/explicit-function-return-type": [
+                "warn",
+                { allowExpressions: true }, // Opcional: Permite omitir tipos en funciones de flecha
+            ],
         },
     }),
 ];
