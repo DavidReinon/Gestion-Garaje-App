@@ -1,53 +1,47 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
-import { Input } from "@/components/ui/input"; // Componente Input de shadcn
-import { Button } from "@/components/ui/button"; // Componente Button de shadcn
-import { createClient } from "@/utils/supabase/client"; // Supabase client
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
+import DatePicker from "@/components/date-picker";
+
+type ClientFormData = {
+    nombre?: string;
+    apellidos?: string;
+    email?: string;
+    telefono?: string;
+    direccion?: string;
+    fecha_entrada?: Date;
+    fecha_salida?: Date;
+};
 
 const CrearCliente: React.FC = () => {
-    const [formData, setFormData] = useState({
-        nombre: "",
-        apellidos: "",
-        email: "",
-        telefono: "",
-        direccion: "",
-        fecha_entrada: "",
-        fecha_salida: "",
-    });
+    const [formData, setFormData] = useState<ClientFormData>({});
     const [loading, setLoading] = useState(false);
     const supabase = createClient();
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
-        //TODO: Datos opcionales a null
-        // Si el valor es una cadena vacía, lo convertimos a null
-        setFormData((prev) => ({ ...prev, [name]: value || null }));
+        console.log(value === "" ? `${name} VACIO` : value);
+        setFormData((prev) => ({ ...prev!, [name]: !value ? null : value }));
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent): Promise<void> => {
         e.preventDefault();
         setLoading(true);
 
         console.log(formData);
-        const { error } = await supabase.from("clientes").insert([formData]);
+        // const { error } = await supabase.from("clientes").insert([formData]);
 
-        if (error) {
-            console.error("Error al crear cliente:", error);
-            alert("Hubo un error al crear el cliente.");
-        } else {
-            alert("Cliente creado exitosamente.");
-            setFormData({
-                nombre: "",
-                apellidos: "",
-                email: "",
-                telefono: "",
-                direccion: "",
-                fecha_entrada: "",
-                fecha_salida: "",
-            });
-        }
+        // if (error) {
+        //     console.error("Error al crear cliente:", error);
+        //     alert("Hubo un error al crear el cliente.");
+        //     return;
+        // }
 
+        alert("Cliente creado exitosamente.");
+        setFormData({});
         setLoading(false);
     };
 
@@ -60,67 +54,61 @@ const CrearCliente: React.FC = () => {
                 <h1 className="text-2xl font-bold mb-4">Crear Cliente</h1>
                 <Input
                     name="nombre"
-                    placeholder="Nombre"
-                    value={formData.nombre}
+                    placeholder="Nombre *"
+                    value={formData.nombre ?? ""}
                     onChange={handleChange}
                     required
                 />
                 <Input
                     name="apellidos"
                     placeholder="Apellidos"
-                    value={formData.apellidos}
+                    value={formData.apellidos ?? ""}
                     onChange={handleChange}
                 />
                 <Input
                     name="email"
                     type="email"
                     placeholder="Correo Electrónico"
-                    value={formData.email}
+                    value={formData.email ?? ""}
                     onChange={handleChange}
                 />
                 <Input
                     name="telefono"
                     type="tel"
-                    placeholder="Teléfono"
-                    value={formData.telefono}
+                    placeholder="Teléfono *"
+                    value={formData.telefono ?? ""}
                     onChange={handleChange}
                     required
                 />
                 <Input
                     name="direccion"
-                    placeholder="Dirección"
-                    value={formData.direccion}
+                    placeholder="Dirección *"
+                    value={formData.direccion ?? ""}
                     onChange={handleChange}
                     required
                 />
                 <div className="flex flex-row justify-around mt-3">
-                    <div>
-                        <label htmlFor="fecha_entrada" className="text-sm">
-                            Fecha de Entrada
-                        </label>
-                        <Input
-                            name="fecha_entrada"
-                            id="fecha_entrada"
-                            type="date"
-                            placeholder="Fecha de Entrada"
-                            value={formData.fecha_entrada}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="fecha_salida" className="text-sm">
-                            Fecha de salida (Opcional)
-                        </label>
-                        <Input
-                            name="fecha_salida"
-                            id="fecha_salida"
-                            type="date"
-                            placeholder="Fecha de Salida"
-                            value={formData.fecha_salida}
-                            onChange={handleChange}
-                        />
-                    </div>
+                    <DatePicker
+                        label="Fecha de entrada"
+                        required={true}
+                        date={formData.fecha_entrada}
+                        setDate={(date) =>
+                            setFormData((prev) => ({
+                                ...prev,
+                                fecha_entrada: date,
+                            }))
+                        }
+                    />
+                    <DatePicker
+                        label="Fecha de salida"
+                        date={formData.fecha_salida}
+                        setDate={(date) =>
+                            setFormData((prev) => ({
+                                ...prev,
+                                fecha_salida: date,
+                            }))
+                        }
+                    />
                 </div>
                 <Button type="submit" disabled={loading}>
                     {loading ? "Creando..." : "Crear Cliente"}
