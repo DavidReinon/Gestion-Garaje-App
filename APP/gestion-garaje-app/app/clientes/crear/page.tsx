@@ -5,26 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
 import DatePicker from "@/components/date-picker";
-
-type ClientFormData = {
-    nombre?: string;
-    apellidos?: string;
-    email?: string;
-    telefono?: string;
-    direccion?: string;
-    fecha_entrada?: Date;
-    fecha_salida?: Date;
-};
+import { TablesInsert } from "@/utils/types/supabase";
 
 const CrearCliente: React.FC = () => {
+    // Hacemos que todos los campos sean opcionales
+    type ClientFormData = Partial<TablesInsert<"clientes">>;
+
     const [formData, setFormData] = useState<ClientFormData>({});
     const [loading, setLoading] = useState(false);
     const supabase = createClient();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
-        console.log(value === "" ? `${name} VACIO` : value);
-        setFormData((prev) => ({ ...prev!, [name]: !value ? null : value }));
+        setFormData((prev) => ({ ...prev, [name]: value || null }));
     };
 
     const handleSubmit = async (e: FormEvent): Promise<void> => {
@@ -32,13 +25,15 @@ const CrearCliente: React.FC = () => {
         setLoading(true);
 
         console.log(formData);
-        // const { error } = await supabase.from("clientes").insert([formData]);
 
-        // if (error) {
-        //     console.error("Error al crear cliente:", error);
-        //     alert("Hubo un error al crear el cliente.");
-        //     return;
-        // }
+        const { error } = await supabase.from("clientes").insert([formData]);
+
+        if (error) {
+            console.error("Error al crear cliente:", error);
+            alert("Hubo un error al crear el cliente.");
+            setLoading(false);
+            return;
+        }
 
         alert("Cliente creado exitosamente.");
         setFormData({});
@@ -88,10 +83,15 @@ const CrearCliente: React.FC = () => {
                     required
                 />
                 <div className="flex flex-row justify-around mt-3">
+                    {/* //TODO: Arreglar Tipo para las fechas con supabase gen types */}
                     <DatePicker
                         label="Fecha de entrada"
                         required={true}
-                        date={formData.fecha_entrada}
+                        date={
+                            formData.fecha_entrada
+                                ? new Date(formData.fecha_entrada)
+                                : undefined
+                        }
                         setDate={(date) =>
                             setFormData((prev) => ({
                                 ...prev,
@@ -101,11 +101,15 @@ const CrearCliente: React.FC = () => {
                     />
                     <DatePicker
                         label="Fecha de salida"
-                        date={formData.fecha_salida}
+                        date={
+                            formData.fecha_salida
+                                ? new Date(formData.fecha_salida)
+                                : undefined
+                        }
                         setDate={(date) =>
                             setFormData((prev) => ({
                                 ...prev,
-                                fecha_salida: date,
+                                fecha_salida: date ? date.toISOString() : null,
                             }))
                         }
                     />
