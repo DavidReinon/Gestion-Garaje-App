@@ -37,32 +37,53 @@ export type Database = {
             clientes: {
                 Row: {
                     apellidos: string | null;
-                    direccion: string | null;
+                    codigo_postal: string;
+                    direccion: string;
+                    dni: string;
                     email: string | null;
                     fecha_entrada: string;
                     fecha_salida: string | null;
                     id: number;
                     nombre: string;
+                    numero_cuenta_iban: string;
+                    numero_plaza: number;
+                    observaciones: string | null;
+                    poblacion: string;
+                    provincia: string;
                     telefono: string;
                 };
                 Insert: {
                     apellidos?: string | null;
-                    direccion?: string | null;
+                    codigo_postal?: string;
+                    direccion: string;
+                    dni: string;
                     email?: string | null;
                     fecha_entrada: string;
                     fecha_salida?: string | null;
                     id?: number;
                     nombre: string;
+                    numero_cuenta_iban: string;
+                    numero_plaza: number;
+                    observaciones?: string | null;
+                    poblacion?: string;
+                    provincia?: string;
                     telefono: string;
                 };
                 Update: {
                     apellidos?: string | null;
-                    direccion?: string | null;
+                    codigo_postal?: string;
+                    direccion?: string;
+                    dni?: string;
                     email?: string | null;
                     fecha_entrada?: string;
                     fecha_salida?: string | null;
                     id?: number;
                     nombre?: string;
+                    numero_cuenta_iban?: string;
+                    numero_plaza?: number;
+                    observaciones?: string | null;
+                    poblacion?: string;
+                    provincia?: string;
                     telefono?: string;
                 };
                 Relationships: [];
