@@ -43,7 +43,7 @@ export default function RootLayout({
                         <AppSidebar />
                         <div className="flex flex-col w-full min-h-screen mt-2">
                             <SidebarTrigger />
-                            <main className="">{children}</main>
+                            <main className="w-full">{children}</main>
                         </div>
                     </SidebarProvider>
                 </ThemeProvider>
