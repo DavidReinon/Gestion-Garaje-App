@@ -33,15 +33,16 @@ const ClientesView: FC = () => {
             }
 
             console.log(data);
-            const clientesConCoche = data.map((cliente) => ({
+            const clientesFinalData = data.map((cliente) => ({
                 ...cliente,
-                coche: cliente.coches
-                    ? `${cliente.coches[0]?.marca} ${cliente.coches[0]?.modelo}`
-                    : "-",
+                coche:
+                    cliente.coches.length > 0
+                        ? `${cliente.coches[0]?.marca} ${cliente.coches[0]?.modelo}`
+                        : "-",
                 matricula: cliente.coches[0]?.matricula || "-",
             }));
 
-            setClientes(clientesConCoche);
+            setClientes(clientesFinalData);
             setLoading(false);
         };
 
@@ -103,7 +104,7 @@ const ClientesView: FC = () => {
     ];
 
     return (
-        <div className="flex justify-center ms-5 mt-10 w-full">
+        <div className="flex justify-center ms-5 mt-10">
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
                 <h1 className="text-2xl font-bold mb-2">Lista de Clientes</h1>
                 <p className="text-sm text-gray-500 mb-3">
