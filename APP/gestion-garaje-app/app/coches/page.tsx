@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase";
+import { useRouter } from "next/navigation";
 
 const CochesView: FC = () => {
     type Coche = Tables<"coches">;
@@ -12,6 +13,7 @@ const CochesView: FC = () => {
     const [coches, setCoches] = useState<Coche[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const supabase = createClient();
+    const router = useRouter();
 
     useEffect(() => {
         const fetchCoches = async () => {
@@ -29,7 +31,7 @@ const CochesView: FC = () => {
             console.log(data);
             const cochesConDueño = data.map((coche) => ({
                 ...coche,
-                dueño: coche.clientes
+                dueño: coche.clientes > 0
                     ? `${coche.clientes?.nombre} ${coche.clientes?.apellidos}`
                     : "-",
                 telefono: coche.clientes?.telefono || "-",
@@ -50,7 +52,7 @@ const CochesView: FC = () => {
                     Aquí puedes ver la lista de coches registrados.
                 </p>
                 <div className="flex justify-start mb-3">
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <button onClick={() => router.push("coches/crear")} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                         Añadir
                     </button>
                 </div>
