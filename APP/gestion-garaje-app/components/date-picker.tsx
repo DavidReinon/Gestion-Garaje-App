@@ -13,14 +13,12 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 type DatePickerProps = {
-    label: string;
     date?: Date;
     setDate: (date: Date | undefined) => void;
     required?: boolean;
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
-    label,
     date,
     setDate,
     required,
@@ -33,9 +31,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     return (
         <div className="flex flex-col">
-            <label className="text-sm mb-1">
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
@@ -65,11 +60,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     />
                 </PopoverContent>
             </Popover>
-            {touched && required && !date && (
-                <span className="text-red-500 text-xs mt-1">
-                    Este campo es obligatorio.
-                </span>
-            )}
         </div>
     );
 };

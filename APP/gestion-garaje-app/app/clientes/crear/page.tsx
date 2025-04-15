@@ -1,123 +1,379 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import DatePicker from "@/components/date-picker";
 import { TablesInsert } from "@/utils/types/supabase";
+import {
+    Form,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage,
+    FormDescription,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import DatePicker from "@/components/date-picker";
 
-const CrearCliente: React.FC = () => {
-    // Hacemos que todos los campos sean opcionales
-    type ClientFormData = Partial<TablesInsert<"clientes">>;
+// Definición del esquema de validación con Zod
+const clientSchema = z
+    .object({
+        nombre: z.string().min(1, "El nombre es obligatorio"),
+        apellidos: z.string().optional(),
+        email: z
+            .string()
+            .email("Correo electrónico inválido")
+            .or(z.literal(""))
+            .optional(),
+        telefono: z
+            .string()
+            .min(9, "El teléfono debe tener al menos 9 numeros")
+            .max(9, "El teléfono debe tener como máximo 9 numeros")
+            .regex(/^\d{9}$/, "El teléfono debe contener solo números"),
+        direccion: z.string().min(1, "La dirección es obligatoria"),
+        dni: z.string().min(9, "El DNI es obligatorio"),
+        numero_cuenta_iban: z.string().min(1, "El IBAN es obligatorio"),
+        numero_plaza: z.coerce
+            .number()
+            .int()
+            .min(1, "Número de plaza inválido"),
+        codigo_postal: z
+            .string()
+            .min(
+                5,
+                "El código postal es obligatorio. Debe contener 5 numeros."
+            ),
+        poblacion: z.string().min(1, "La población es obligatoria"),
+        provincia: z.string().min(1, "La provincia es obligatoria"),
+        observaciones: z.string().optional(),
+        fecha_entrada: z.date({
+            required_error: "La fecha de entrada es obligatoria",
+        }),
+        fecha_salida: z.date().optional(),
+    })
+    .refine(
+        ({ fecha_entrada, fecha_salida }) =>
+            !fecha_salida || // Si `fecha_salida` es undefined, no se valida
+            fecha_salida >= fecha_entrada, // Si existe, debe ser mayor o igual a `fecha_entrada`
+        {
+            message:
+                "La fecha de salida no puede ser anterior a la fecha de entrada",
+            path: ["fecha_salida"],
+        }
+    );
 
-    const [formData, setFormData] = useState<ClientFormData>({});
-    const [loading, setLoading] = useState(false);
+type ClientFormData = z.infer<typeof clientSchema>;
+
+const CrearCliente = () => {
     const supabase = createClient();
+    const [loading, setLoading] = useState(false);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value || null }));
-    };
+    // Inicialización del formulario con react-hook-form y zodResolver
+    const form = useForm<ClientFormData>({
+        resolver: zodResolver(clientSchema),
+        defaultValues: {
+            nombre: "",
+            apellidos: "",
+            email: "",
+            telefono: "",
+            direccion: "",
+            dni: "",
+            numero_cuenta_iban: "",
+            numero_plaza: 0,
+            codigo_postal: "46470",
+            poblacion: "Catarroja",
+            provincia: "Valencia",
+            observaciones: "",
+            fecha_entrada: undefined,
+            fecha_salida: undefined,
+        },
+    });
 
-    const handleSubmit = async (e: FormEvent): Promise<void> => {
-        e.preventDefault();
+    // Manejo del envío del formulario
+    const onSubmit = async (data: ClientFormData) => {
         setLoading(true);
+        const payload: TablesInsert<"clientes"> = {
+            ...data,
+            fecha_entrada: data.fecha_entrada.toISOString(),
+            fecha_salida: data.fecha_salida?.toISOString() ?? null,
+        };
 
-        console.log(formData);
-
-        const { error } = await supabase.from("clientes").insert([formData]);
+        const { error } = await supabase.from("clientes").insert([payload]);
 
         if (error) {
             console.error("Error al crear cliente:", error);
-            alert("Hubo un error al crear el cliente.");
+            alert(`Hubo un error al crear el cliente.\n${error.message}`);
             setLoading(false);
             return;
         }
 
         alert("Cliente creado exitosamente.");
-        setFormData({});
+        form.reset();
+
         setLoading(false);
     };
 
     return (
         <div className="flex justify-center mt-10">
-            <form
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-4 p-6 bg-neutral-50 rounded-lg shadow-md max-w-md w-full"
-            >
-                <h1 className="text-2xl font-bold mb-4">Crear Cliente</h1>
-                <Input
-                    name="nombre"
-                    placeholder="Nombre *"
-                    value={formData.nombre ?? ""}
-                    onChange={handleChange}
-                    required
-                />
-                <Input
-                    name="apellidos"
-                    placeholder="Apellidos"
-                    value={formData.apellidos ?? ""}
-                    onChange={handleChange}
-                />
-                <Input
-                    name="email"
-                    type="email"
-                    placeholder="Correo Electrónico"
-                    value={formData.email ?? ""}
-                    onChange={handleChange}
-                />
-                <Input
-                    name="telefono"
-                    type="tel"
-                    placeholder="Teléfono *"
-                    value={formData.telefono ?? ""}
-                    onChange={handleChange}
-                    required
-                />
-                <Input
-                    name="direccion"
-                    placeholder="Dirección *"
-                    value={formData.direccion ?? ""}
-                    onChange={handleChange}
-                    required
-                />
-                <div className="flex flex-row justify-around mt-3">
-                    {/* //TODO: Arreglar Tipo para las fechas con supabase gen types */}
-                    <DatePicker
-                        label="Fecha de entrada"
-                        required={true}
-                        date={
-                            formData.fecha_entrada
-                                ? new Date(formData.fecha_entrada)
-                                : undefined
-                        }
-                        setDate={(date) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                fecha_entrada: date,
-                            }))
-                        }
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="flex flex-col gap-4 p-6 bg-neutral-50 rounded-lg shadow-md max-w-md w-full"
+                >
+                    <h1 className="text-2xl font-bold">Crear Cliente</h1>
+                    <FormDescription>
+                        Los campos marcados con * son obligatorios
+                    </FormDescription>
+
+                    <div className="flex gap-4">
+                        <FormField
+                            control={form.control}
+                            name="nombre"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>Nombre *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Nombre"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="apellidos"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>Apellidos</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Apellidos"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="flex gap-4">
+                        <FormField
+                            control={form.control}
+                            name="telefono"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>Teléfono *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="tel"
+                                            placeholder="Teléfono"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="dni"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>DNI *</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="DNI" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Correo Electrónico</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="Correo Electrónico"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                    <DatePicker
-                        label="Fecha de salida"
-                        date={
-                            formData.fecha_salida
-                                ? new Date(formData.fecha_salida)
-                                : undefined
-                        }
-                        setDate={(date) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                fecha_salida: date ? date.toISOString() : null,
-                            }))
-                        }
+                    <FormField
+                        control={form.control}
+                        name="direccion"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Dirección *</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Dirección" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                </div>
-                <Button type="submit" disabled={loading}>
-                    {loading ? "Creando..." : "Crear Cliente"}
-                </Button>
-            </form>
+                    <div className="flex gap-4">
+                        <FormField
+                            control={form.control}
+                            name="codigo_postal"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Código Postal *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Código Postal"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="poblacion"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Población *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Población"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="provincia"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Provincia *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Provincia"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <FormField
+                        control={form.control}
+                        name="numero_cuenta_iban"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>IBAN *</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Número de cuenta IBAN"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="numero_plaza"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Número de Plaza *</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="number"
+                                        placeholder="Número de Plaza"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="observaciones"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Observaciones</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Observaciones del cliente"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="flex gap-4">
+                        <FormField
+                            control={form.control}
+                            name="fecha_entrada"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>Fecha de Entrada *</FormLabel>
+                                    <FormControl>
+                                        <DatePicker
+                                            required
+                                            date={field.value}
+                                            setDate={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="fecha_salida"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[120px]">
+                                    <FormLabel>Fecha de Salida</FormLabel>
+                                    <FormControl>
+                                        <DatePicker
+                                            date={field.value}
+                                            setDate={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <Button type="submit" disabled={loading}>
+                        {loading ? "Creando..." : "Crear Cliente"}
+                    </Button>
+                </form>
+            </Form>
         </div>
     );
 };
