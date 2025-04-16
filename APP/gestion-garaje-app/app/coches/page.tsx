@@ -31,7 +31,7 @@ const CochesView: FC = () => {
             console.log(data);
             const cochesConDueño = data.map((coche) => ({
                 ...coche,
-                dueño: coche.clientes > 0
+                dueño: coche.clientes
                     ? `${coche.clientes?.nombre} ${coche.clientes?.apellidos}`
                     : "-",
                 telefono: coche.clientes?.telefono || "-",
@@ -52,7 +52,10 @@ const CochesView: FC = () => {
                     Aquí puedes ver la lista de coches registrados.
                 </p>
                 <div className="flex justify-start mb-3">
-                    <button onClick={() => router.push("coches/crear")} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <button
+                        onClick={() => router.push("coches/crear")}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
                         Añadir
                     </button>
                 </div>
