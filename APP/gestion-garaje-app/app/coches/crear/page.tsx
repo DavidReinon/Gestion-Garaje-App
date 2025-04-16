@@ -28,51 +28,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
 
 // Definición del esquema de validación con Zod
-const carSchema = z
-    .object({
-        marca: z.string().min(1, "La marca es obligatoria"),
-        modelo: z.string().min(1, "El modelo es obligatorio"),
-        matricula: z.string().min(1, "La matrícula es obligatoria"),
-        año: z.string().optional(),
-        color: z.string().optional(),
-        tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
-        numero_plaza: z.string().optional(),
-        cliente_id: z.string().min(1, "El cliente es obligatorio"),
-    })
-    .refine(
-        ({ año }) => {
-            const parsedYear = año ? Number(año) : null;
-            return !parsedYear || parsedYear >= 1900;
-        },
-        {
-            message: "El año no puede ser menor a 1900",
-            path: ["año"],
-        }
-    )
-    .refine(
-        ({ año }) => {
-            const currentYear = new Date().getFullYear();
-            const parsedYear = año ? Number(año) : null;
-            return !parsedYear || parsedYear <= currentYear;
-        },
-        {
-            message: "El año no puede ser mayor al año actual",
-            path: ["año"],
-        }
-    )
-    //TODO
-    .refine(
-        ({ numero_plaza }) => {
-            const parsedPlaza = numero_plaza ? Number(numero_plaza) : null;
-            console.log(parsedPlaza);
-            console.log(parsedPlaza! > 0);
-            return !parsedPlaza || parsedPlaza > 0;
-        },
-        {
-            message: "El número de plaza debe ser mayor a 0",
-            path: ["numero_plaza"], // Asegúrate de que coincida con el nombre del campo
-        }
-    );
+const carSchema = z.object({
+    marca: z.string().min(1, "La marca es obligatoria"),
+    modelo: z.string().min(1, "El modelo es obligatorio"),
+    matricula: z.string().min(1, "La matrícula es obligatoria"),
+    año: z.coerce
+        .number()
+        .min(1900, "El año no puede ser menor a 1900")
+        .max(
+            new Date().getFullYear(),
+            "El año no puede ser mayor al año actual"
+        )
+        .optional(), // Convierte automáticamente a número y valida el rango
+    color: z.string().optional(),
+    tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
+    numero_plaza: z.coerce
+        .number()
+        .min(1, "El número de plaza debe ser mayor a 0"), // Convierte automáticamente a número y valida
+    cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
+});
 const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
 
 type CarFormData = z.infer<typeof carSchema>;
@@ -117,11 +91,11 @@ const CrearCoche: React.FC = () => {
             marca: "",
             modelo: "",
             matricula: "",
-            año: "2000",
+            año: 0,
             color: "",
-            numero_plaza: "",
+            numero_plaza: 0,
             tipo: "Estandar",
-            cliente_id: "",
+            cliente_id: 0,
         },
     });
 
@@ -129,11 +103,6 @@ const CrearCoche: React.FC = () => {
         setLoading(true);
         const payload: TablesInsert<"coches"> = {
             ...data,
-            cliente_id: parseInt(data.cliente_id),
-            año: data.año ? parseInt(data.año) : null,
-            numero_plaza: data.numero_plaza
-                ? parseInt(data.numero_plaza)
-                : null,
         };
 
         const { error } = await supabase.from("coches").insert([payload]);
@@ -312,7 +281,7 @@ const CrearCoche: React.FC = () => {
                                 <FormControl>
                                     <Select
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value.toString()}
+                                        defaultValue={field.value?.toString()}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona el dueño" />
