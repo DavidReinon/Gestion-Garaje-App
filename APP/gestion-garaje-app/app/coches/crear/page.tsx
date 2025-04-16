@@ -3,9 +3,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { TablesInsert } from "@/utils/types/supabase";
+import { Tables, TablesInsert } from "@/utils/types/supabase";
 import {
     Form,
     FormField,
@@ -24,51 +24,98 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@radix-ui/react-label";
 
 // Definición del esquema de validación con Zod
-const carSchema = z.object({
-    marca: z.string().min(1, "La marca es obligatoria"),
-    modelo: z.string().min(1, "El modelo es obligatorio"),
-    matricula: z
-        .string()
-        .regex(/^[A-Z0-9]{1,10}$/, "La matrícula debe ser válida")
-        .min(1, "La matrícula es obligatoria"),
-    año: z
-        .number()
-        .int()
-        .min(1900, "El año debe ser mayor o igual a 1900")
-        .max(new Date().getFullYear(), "El año no puede ser mayor al actual")
-        .optional(),
-    color: z.string().optional(),
-    tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
-    cliente_id: z.number().int().optional(),
-});
+const carSchema = z
+    .object({
+        marca: z.string().min(1, "La marca es obligatoria"),
+        modelo: z.string().min(1, "El modelo es obligatorio"),
+        matricula: z.string().min(1, "La matrícula es obligatoria"),
+        año: z.string().optional(),
+        color: z.string().optional(),
+        tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
+        cliente_id: z.string().min(1, "El cliente es obligatorio"),
+    })
+    .refine(
+        ({ año }) => {
+            const parsedYear = año ? Number(año) : null;
+            return !parsedYear || parsedYear >= 1900;
+        },
+        {
+            message: "El año no puede ser menor a 1900",
+            path: ["año"],
+        }
+    )
+    .refine(
+        ({ año }) => {
+            const currentYear = new Date().getFullYear();
+            const parsedYear = año ? Number(año) : null;
+            return !parsedYear || parsedYear <= currentYear;
+        },
+        {
+            message: "El año no puede ser mayor al año actual",
+            path: ["año"],
+        }
+    );
+const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
 
 type CarFormData = z.infer<typeof carSchema>;
+type Cliente = Tables<"clientes">;
 
-const CrearCoche = () => {
+const CrearCoche: React.FC = () => {
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [isSpainMatricula, setIsSpainMatricula] = useState(true);
 
-    // Inicialización del formulario con react-hook-form y zodResolver
+    useEffect(() => {
+        const fetchClientes = async () => {
+            const { data, error } = await supabase.from("clientes").select("*");
+
+            if (error) {
+                console.error("Error al obtener clientes:", error);
+                return;
+            }
+
+            setClientes(data || []);
+        };
+
+        fetchClientes();
+    }, [supabase]);
+
     const form = useForm<CarFormData>({
-        resolver: zodResolver(carSchema),
+        resolver: zodResolver(
+            carSchema.refine(
+                (
+                    { matricula } //False para hacer la validación
+                ) => !isSpainMatricula || spainMatriculaRegex.test(matricula),
+                {
+                    message: isSpainMatricula
+                        ? "La matrícula debe ser válida para España (formato: 1234 BCD)"
+                        : undefined,
+                    path: ["matricula"],
+                }
+            )
+        ),
         defaultValues: {
             marca: "",
             modelo: "",
             matricula: "",
-            año: undefined,
+            año: "2000",
             color: "",
-            tipo: undefined,
-            cliente_id: undefined,
+            tipo: "Estandar",
+            cliente_id: "",
         },
     });
 
-    // Manejo del envío del formulario
     const onSubmit = async (data: CarFormData) => {
         setLoading(true);
         const payload: TablesInsert<"coches"> = {
             ...data,
+            cliente_id: parseInt(data.cliente_id),
+            año: data.año ? parseInt(data.año) : null,
         };
 
         const { error } = await supabase.from("coches").insert([payload]);
@@ -140,6 +187,22 @@ const CrearCoche = () => {
                         )}
                     />
 
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            checked={isSpainMatricula}
+                            onCheckedChange={() =>
+                                setIsSpainMatricula(!isSpainMatricula)
+                            }
+                            id="spainMatricula"
+                        />
+                        <Label
+                            htmlFor="spainMatricula"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Formato Matricula Española
+                        </Label>
+                    </div>
+
                     <FormField
                         control={form.control}
                         name="año"
@@ -209,13 +272,33 @@ const CrearCoche = () => {
                         name="cliente_id"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>ID del Cliente</FormLabel>
+                                <FormLabel>Dueño del Coche *</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="ID del Cliente"
-                                        {...field}
-                                    />
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value.toString()}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona el dueño" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {clientes.map(
+                                                ({
+                                                    nombre,
+                                                    apellidos,
+                                                    id,
+                                                    numero_plaza,
+                                                }) => (
+                                                    <SelectItem
+                                                        key={id}
+                                                        value={id.toString()}
+                                                    >
+                                                        {`${nombre} ${apellidos} - Nº Plaza: ${numero_plaza}`}
+                                                    </SelectItem>
+                                                )
+                                            )}
+                                        </SelectContent>
+                                    </Select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
