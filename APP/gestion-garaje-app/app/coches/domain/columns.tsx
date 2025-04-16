@@ -23,6 +23,10 @@ export const columns: ColumnDef<Coche>[] = [
         header: "Color",
     },
     {
+        accessorKey: "numero_plaza",
+        header: "Nº Plaza",
+    },
+    {
         accessorKey: "año",
         header: "Año",
     },

@@ -36,6 +36,7 @@ const carSchema = z
         año: z.string().optional(),
         color: z.string().optional(),
         tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
+        numero_plaza: z.string().optional(),
         cliente_id: z.string().min(1, "El cliente es obligatorio"),
     })
     .refine(
@@ -57,6 +58,19 @@ const carSchema = z
         {
             message: "El año no puede ser mayor al año actual",
             path: ["año"],
+        }
+    )
+    //TODO
+    .refine(
+        ({ numero_plaza }) => {
+            const parsedPlaza = numero_plaza ? Number(numero_plaza) : null;
+            console.log(parsedPlaza);
+            console.log(parsedPlaza! > 0);
+            return !parsedPlaza || parsedPlaza > 0;
+        },
+        {
+            message: "El número de plaza debe ser mayor a 0",
+            path: ["numero_plaza"], // Asegúrate de que coincida con el nombre del campo
         }
     );
 const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
@@ -105,6 +119,7 @@ const CrearCoche: React.FC = () => {
             matricula: "",
             año: "2000",
             color: "",
+            numero_plaza: "",
             tipo: "Estandar",
             cliente_id: "",
         },
@@ -116,6 +131,9 @@ const CrearCoche: React.FC = () => {
             ...data,
             cliente_id: parseInt(data.cliente_id),
             año: data.año ? parseInt(data.año) : null,
+            numero_plaza: data.numero_plaza
+                ? parseInt(data.numero_plaza)
+                : null,
         };
 
         const { error } = await supabase.from("coches").insert([payload]);
@@ -237,6 +255,24 @@ const CrearCoche: React.FC = () => {
 
                     <FormField
                         control={form.control}
+                        name="numero_plaza"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nº Plaza</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="number"
+                                        placeholder="Nº Plaza"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
                         name="tipo"
                         render={({ field }) => (
                             <FormItem>
@@ -287,13 +323,13 @@ const CrearCoche: React.FC = () => {
                                                     nombre,
                                                     apellidos,
                                                     id,
-                                                    numero_plaza,
+                                                    telefono,
                                                 }) => (
                                                     <SelectItem
                                                         key={id}
                                                         value={id.toString()}
                                                     >
-                                                        {`${nombre} ${apellidos} - Nº Plaza: ${numero_plaza}`}
+                                                        {`${nombre} ${apellidos} - ${telefono}`}
                                                     </SelectItem>
                                                 )
                                             )}

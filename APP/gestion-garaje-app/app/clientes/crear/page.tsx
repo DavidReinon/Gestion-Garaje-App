@@ -38,10 +38,6 @@ const clientSchema = z
         direccion: z.string().min(1, "La dirección es obligatoria"),
         dni: z.string().min(9, "El DNI es obligatorio"),
         numero_cuenta_iban: z.string().min(1, "El IBAN es obligatorio"),
-        numero_plaza: z.coerce
-            .number()
-            .int()
-            .min(1, "Número de plaza inválido"),
         codigo_postal: z
             .string()
             .min(
@@ -84,7 +80,6 @@ const CrearCliente = () => {
             direccion: "",
             dni: "",
             numero_cuenta_iban: "",
-            numero_plaza: 0,
             codigo_postal: "46470",
             poblacion: "Catarroja",
             provincia: "Valencia",
@@ -297,25 +292,6 @@ const CrearCliente = () => {
                             </FormItem>
                         )}
                     />
-
-                    <FormField
-                        control={form.control}
-                        name="numero_plaza"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Número de Plaza *</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="Número de Plaza"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="observaciones"

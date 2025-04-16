@@ -46,7 +46,6 @@ export type Database = {
                     id: number;
                     nombre: string;
                     numero_cuenta_iban: string;
-                    numero_plaza: number;
                     observaciones: string | null;
                     poblacion: string;
                     provincia: string;
@@ -63,7 +62,6 @@ export type Database = {
                     id?: number;
                     nombre: string;
                     numero_cuenta_iban: string;
-                    numero_plaza: number;
                     observaciones?: string | null;
                     poblacion?: string;
                     provincia?: string;
@@ -80,7 +78,6 @@ export type Database = {
                     id?: number;
                     nombre?: string;
                     numero_cuenta_iban?: string;
-                    numero_plaza?: number;
                     observaciones?: string | null;
                     poblacion?: string;
                     provincia?: string;
@@ -91,32 +88,35 @@ export type Database = {
             coches: {
                 Row: {
                     año: number | null;
-                    cliente_id: number | null;
+                    cliente_id: number;
                     color: string | null;
                     id: number;
                     marca: string;
                     matricula: string;
                     modelo: string;
+                    numero_plaza: number | null;
                     tipo: Database["public"]["Enums"]["car_type"] | null;
                 };
                 Insert: {
                     año?: number | null;
-                    cliente_id?: number | null;
+                    cliente_id: number;
                     color?: string | null;
                     id?: number;
                     marca: string;
                     matricula: string;
                     modelo: string;
+                    numero_plaza?: number | null;
                     tipo?: Database["public"]["Enums"]["car_type"] | null;
                 };
                 Update: {
                     año?: number | null;
-                    cliente_id?: number | null;
+                    cliente_id?: number;
                     color?: string | null;
                     id?: number;
                     marca?: string;
                     matricula?: string;
                     modelo?: string;
+                    numero_plaza?: number | null;
                     tipo?: Database["public"]["Enums"]["car_type"] | null;
                 };
                 Relationships: [
