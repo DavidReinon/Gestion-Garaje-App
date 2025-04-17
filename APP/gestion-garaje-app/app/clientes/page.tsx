@@ -3,7 +3,7 @@
 import { FC, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client"; // Importamos Supabase desde utils
 import { DataTable } from "@/components/data-table";
-import { columns } from "./domain/columns";
+import { getColumns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
 import { useRouter } from "next/navigation";
 
@@ -18,6 +18,7 @@ const ClientesView: FC = () => {
 
     const supabase = createClient();
     const router = useRouter();
+    const columns = getColumns(supabase, router);
 
     useEffect(() => {
         const fetchClientes = async () => {
