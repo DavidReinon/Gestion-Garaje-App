@@ -7,7 +7,7 @@ interface StateCardProps {
     icon: React.ReactNode;
 }
 
-const StateCard: React.FC<StateCardProps> = ({
+const StatCard: React.FC<StateCardProps> = ({
     title,
     value,
     change,
@@ -35,4 +35,4 @@ const StateCard: React.FC<StateCardProps> = ({
     );
 };
 
-export default StateCard;
+export default StatCard;
