@@ -6,6 +6,7 @@ import { DataTable } from "@/components/data-table";
 import { getColumns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase";
 import { useRouter } from "next/navigation";
+import { PlusIcon } from "lucide-react";
 
 const CochesView: FC = () => {
     type Coche = Tables<"coches">;
@@ -48,7 +49,7 @@ const CochesView: FC = () => {
     return (
         <div className="flex justify-center ms-5 mt-10 w-full">
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
-                <h1 className="text-2xl font-bold mb-2">Lista de Coches</h1>
+                <h1 className="text-2xl font-bold mb-2">Coches</h1>
                 <p className="text-sm text-gray-500 mb-3">
                     Aquí puedes ver la lista de coches registrados.
                 </p>
@@ -57,7 +58,9 @@ const CochesView: FC = () => {
                         onClick={() => router.push("coches/crear")}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
-                        Añadir
+                        <div className="flex gap-1 align-middle">
+                            <PlusIcon className="w-4" /> Añadir
+                        </div>
                     </button>
                 </div>
                 {loading ? (

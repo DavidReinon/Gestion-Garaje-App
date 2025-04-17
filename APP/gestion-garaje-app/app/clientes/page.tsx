@@ -6,6 +6,7 @@ import { DataTable } from "@/components/data-table";
 import { getColumns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
 import { useRouter } from "next/navigation";
+import { PlusIcon } from "lucide-react";
 
 const ClientesView: FC = () => {
     type Cliente = Tables<"clientes"> & {
@@ -104,16 +105,18 @@ const ClientesView: FC = () => {
     return (
         <div className="flex justify-center ms-5 mt-10">
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
-                <h1 className="text-2xl font-bold mb-2">Lista de Clientes</h1>
+                <h1 className="text-2xl font-bold mb-2">Clientes</h1>
                 <p className="text-sm text-gray-500 mb-3">
-                    Aquí puedes ver la lista de clientes y sus coches.
+                    Aquí puedes ver la lista de clientes registrados.
                 </p>
                 <div className="flex justify-start mb-3">
                     <button
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                         onClick={() => router.push("clientes/crear")}
                     >
-                        Añadir
+                        <div className="flex gap-1 align-middle">
+                            <PlusIcon className="w-4" /> Añadir
+                        </div>
                     </button>
                 </div>
                 {loading ? (

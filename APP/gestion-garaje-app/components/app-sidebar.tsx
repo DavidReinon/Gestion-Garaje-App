@@ -41,11 +41,6 @@ const items = [
         icon: Car,
     },
     {
-        title: "Recibos",
-        url: "/recibos",
-        icon: File,
-    },
-    {
         title: "Ajustes",
         url: "/ajustes",
         icon: Settings,
