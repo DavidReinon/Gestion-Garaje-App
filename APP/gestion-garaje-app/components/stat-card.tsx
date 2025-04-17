@@ -1,13 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-interface StateCardProps {
+interface StatCardProps {
     title: string;
     value: string;
     change: string;
     icon: React.ReactNode;
 }
 
-const StateCard: React.FC<StateCardProps> = ({
+const StatCard: React.FC<StatCardProps> = ({
     title,
     value,
     change,
@@ -35,4 +35,4 @@ const StateCard: React.FC<StateCardProps> = ({
     );
 };
 
-export default StateCard;
+export default StatCard;

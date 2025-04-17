@@ -2,7 +2,7 @@
 import { ParkingCircle, Car, Users } from "lucide-react";
 import WelcomeHeader from "@/components/welcome-header";
 import  RecentActivity from "@/components/recent-activity";
-import StateCard from "@/components/state-card";
+import { StatCard } from "@/components/stat-card";
 
 const HomePage: React.FC = () => {
     const activities = [
@@ -29,19 +29,19 @@ const HomePage: React.FC = () => {
 
             {/* Estadísticas rápidas */}
             <div className="grid gap-4 md:grid-cols-3 mb-8">
-                <StateCard
+                <StatCard
                     title="Plazas Ocupadas"
                     value="24/36"
                     change="-2"
                     icon={<ParkingCircle className="h-6 w-6 text-primary" />}
                 />
-                <StateCard
+                <StatCard
                     title="Vehículos totales"
                     value="124"
                     change="+8 este mes"
                     icon={<Car className="h-6 w-6 text-primary" />}
                 />
-                <StateCard
+                <StatCard
                     title="Clientes activos"
                     value="32"
                     change="+3"
