@@ -114,11 +114,11 @@ const CrearCliente = () => {
     };
 
     return (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center my-10">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="flex flex-col gap-4 p-6 bg-neutral-50 rounded-lg shadow-md max-w-md w-full"
+                    className="flex flex-col gap-4 p-6 bg-neutral-50 rounded-lg shadow-md max-w-fit w-full"
                 >
                     <h1 className="text-2xl font-bold">Crear Cliente</h1>
                     <FormDescription>
@@ -345,7 +345,7 @@ const CrearCliente = () => {
                             )}
                         />
                     </div>
-                    <Button type="submit" disabled={loading}>
+                    <Button className="mt-5" type="submit" disabled={loading}>
                         {loading ? "Creando..." : "Crear Cliente"}
                     </Button>
                 </form>
