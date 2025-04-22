@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { FC, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { TablesInsert } from "@/utils/types/supabase";
 import {
@@ -54,6 +54,8 @@ const clientSchema = z
     })
     .refine(
         ({ fecha_entrada, fecha_salida }) =>
+            //En el caso de que esta validación no se cumpla (sea false), se lanza el message:
+
             !fecha_salida || // Si `fecha_salida` es undefined, no se valida
             fecha_salida >= fecha_entrada, // Si existe, debe ser mayor o igual a `fecha_entrada`
         {
@@ -65,7 +67,7 @@ const clientSchema = z
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
-const CrearCliente = () => {
+const CrearCliente: FC = () => {
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
 
@@ -89,7 +91,6 @@ const CrearCliente = () => {
         },
     });
 
-    // Manejo del envío del formulario
     const onSubmit = async (data: ClientFormData) => {
         setLoading(true);
         const payload: TablesInsert<"clientes"> = {

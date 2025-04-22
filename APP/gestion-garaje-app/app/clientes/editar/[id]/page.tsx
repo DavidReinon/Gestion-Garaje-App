@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -66,7 +66,7 @@ const clientSchema = z
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
-const EditarCliente = () => {
+const EditarCliente: FC = () => {
     const supabase = createClient();
     const router = useRouter();
     const params = useParams();
