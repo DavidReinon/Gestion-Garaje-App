@@ -1,8 +1,8 @@
 // app/page.tsx
 import { ParkingCircle, Car, Users } from "lucide-react";
 import WelcomeHeader from "@/components/welcome-header";
-import  RecentActivity from "@/components/recent-activity";
-import { StatCard } from "@/components/stat-card";
+import RecentActivity from "@/components/recent-activity";
+import StatCard from "@/components/stat-card";
 
 const HomePage: React.FC = () => {
     const activities = [
