@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import DatePicker from "@/components/date-picker";
+import formatToLocalTimeZoneString from "@/utils/date-helper";
 
 const clientSchema = z
     .object({
@@ -138,8 +139,10 @@ const EditarCliente: FC = () => {
 
         const payload: TablesUpdate<"clientes"> = {
             ...data,
-            fecha_entrada: data.fecha_entrada.toISOString(),
-            fecha_salida: data.fecha_salida?.toISOString() ?? null,
+            fecha_entrada: formatToLocalTimeZoneString(data.fecha_entrada),
+            fecha_salida: data.fecha_salida
+                ? formatToLocalTimeZoneString(data.fecha_salida)
+                : null,
         };
 
         const { error } = await supabase
