@@ -3,8 +3,11 @@ import { ParkingCircle, Car, Users } from "lucide-react";
 import WelcomeHeader from "@/components/welcome-header";
 import RecentActivity from "@/components/recent-activity";
 import StatCard from "@/components/stat-card";
+import getDashboardStats from "@/services/dashboard.service";
 
-const HomePage: React.FC = () => {
+const HomePage: React.FC = async () => {
+    const stats = await getDashboardStats();
+    console.log(stats);
     const activities = [
         {
             time: "Hace 10 min",
@@ -33,19 +36,19 @@ const HomePage: React.FC = () => {
                     title="Plazas Ocupadas"
                     value="24/36"
                     change="-2"
-                    icon={<ParkingCircle className="h-6 w-6 text-primary" />}
+                    icon={ParkingCircle}
                 />
                 <StatCard
                     title="Vehículos totales (activos e inactivos)"
                     value="124"
-                    change="+8 este mes"
-                    icon={<Car className="h-6 w-6 text-primary" />}
+                    change="+8"
+                    icon={Car}
                 />
                 <StatCard
                     title="Clientes activos"
                     value="32"
                     change="+3"
-                    icon={<Users className="h-6 w-6 text-primary" />}
+                    icon={Users}
                 />
             </div>
 
