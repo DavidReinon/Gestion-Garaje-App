@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { TablesUpdate } from "@/utils/types/supabase";
+import { Tables, TablesUpdate } from "@/utils/types/supabase";
 import {
     Form,
     FormField,
@@ -14,6 +14,7 @@ import {
     FormLabel,
     FormControl,
     FormMessage,
+    FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,40 +27,33 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
+import { PostgrestError } from "@supabase/supabase-js";
+
+const carSchema = z.object({
+    marca: z.string().min(1, "La marca es obligatoria"),
+    modelo: z.string().min(1, "El modelo es obligatorio"),
+    matricula: z.string().min(1, "La matrícula es obligatoria"),
+    año: z.coerce
+        .number()
+        .min(1900, "El año no puede ser menor a 1900")
+        .max(
+            new Date().getFullYear(),
+            "El año no puede ser mayor al año actual"
+        )
+        .optional(),
+    color: z.string().optional(),
+    tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
+    numero_plaza: z.coerce
+        .number()
+        .min(1, "El número de plaza debe ser mayor a 0"),
+    cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
+});
 
 const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
 
-const carSchema = z
-    .object({
-        marca: z.string().min(1, "La marca es obligatoria"),
-        modelo: z.string().min(1, "El modelo es obligatorio"),
-        matricula: z.string().min(1, "La matrícula es obligatoria"),
-        año: z.coerce
-            .number()
-            .min(1900, "El año no puede ser menor a 1900")
-            .max(
-                new Date().getFullYear(),
-                "El año no puede ser mayor al año actual"
-            )
-            .optional(),
-        color: z.string().optional(),
-        tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
-        numero_plaza: z.coerce
-            .number()
-            .min(1, "El número de plaza debe ser mayor a 0"),
-        cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
-    })
-    .refine(
-        ({ matricula }, { parent }) =>
-            !parent.isSpainMatricula || spainMatriculaRegex.test(matricula),
-        {
-            message:
-                "La matrícula debe ser válida para España (formato: 1234 BCD)",
-            path: ["matricula"],
-        }
-    );
-
 type CarFormData = z.infer<typeof carSchema>;
+type Car = Tables<"coches">;
+type Cliente = Tables<"clientes">;
 
 const EditarCoche: FC = () => {
     const supabase = createClient();
@@ -68,12 +62,24 @@ const EditarCoche: FC = () => {
     const carId = params?.id;
 
     const [loading, setLoading] = useState(false);
-    const [clientes, setClientes] = useState([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
     const [initialData, setInitialData] = useState<CarFormData | null>(null);
     const [isSpainMatricula, setIsSpainMatricula] = useState(true);
 
     const form = useForm<CarFormData>({
-        resolver: zodResolver(carSchema),
+        resolver: zodResolver(
+            carSchema.refine(
+                (
+                    { matricula } //False para hacer la validación
+                ) => !isSpainMatricula || spainMatriculaRegex.test(matricula),
+                {
+                    message: isSpainMatricula
+                        ? "La matrícula debe ser válida para España (formato: 1234 BCD)"
+                        : undefined,
+                    path: ["matricula"],
+                }
+            )
+        ),
         defaultValues: {
             marca: "",
             modelo: "",
@@ -84,41 +90,66 @@ const EditarCoche: FC = () => {
             numero_plaza: 0,
             cliente_id: 0,
         },
-        context: { isSpainMatricula },
     });
 
     useEffect(() => {
         const fetchCar = async () => {
             if (!carId) return;
-            const { data, error } = await supabase
-                .from("coches")
-                .select("*")
-                .eq("id", carId)
-                .single();
+            const {
+                data,
+                error,
+            }: { data: Car | null; error: PostgrestError | null } =
+                await supabase
+                    .from("coches")
+                    .select("*")
+                    .eq("id", carId)
+                    .single();
 
             if (error) {
                 console.error("Error al obtener coche:", error);
                 return;
             }
 
-            setInitialData(data);
-            form.reset(data);
+            if (data) {
+                console.log(data);
+                const initialDataDto = {
+                    ...data,
+                    numero_plaza: data.numero_plaza || 0,
+                    año: data.año || undefined,
+                    color: data.color || "",
+                    tipo: data.tipo || "Estandar",
+                };
+                console.log("DTO car:", initialDataDto);
+
+                setInitialData(initialDataDto);
+            }
         };
 
         const fetchClientes = async () => {
-            const { data, error } = await supabase.from("clientes").select("*");
+            const {
+                data,
+                error,
+            }: { data: Cliente[] | null; error: PostgrestError | null } =
+                await supabase.from("clientes").select("*");
 
             if (error) {
                 console.error("Error al obtener clientes:", error);
                 return;
             }
+            console.log(data);
 
             setClientes(data || []);
         };
 
-        fetchCar();
         fetchClientes();
-    }, [carId, supabase, form]);
+        fetchCar();
+    }, [carId, supabase]);
+
+    useEffect(() => {
+        if (initialData && Object.keys(initialData).length > 0) {
+            form.reset(initialData);
+        }
+    }, [initialData, form]);
 
     const onSubmit = async (data: CarFormData) => {
         setLoading(true);
@@ -160,6 +191,9 @@ const EditarCoche: FC = () => {
                     className="flex flex-col gap-4 p-6 bg-neutral-50 rounded-lg shadow-md max-w-fit w-full"
                 >
                     <h1 className="text-2xl font-bold">Editar Coche</h1>
+                    <FormDescription>
+                        Los campos marcados con * son obligatorios
+                    </FormDescription>
 
                     <div className="flex gap-4">
                         <FormField
@@ -175,6 +209,7 @@ const EditarCoche: FC = () => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="modelo"
@@ -191,39 +226,40 @@ const EditarCoche: FC = () => {
                                 </FormItem>
                             )}
                         />
-                    </div>
 
-                    <div className="flex flex-col gap-4 items-center">
-                        <FormField
-                            control={form.control}
-                            name="matricula"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Matrícula *</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Matrícula"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                checked={isSpainMatricula}
-                                onCheckedChange={() =>
-                                    setIsSpainMatricula(!isSpainMatricula)
-                                }
-                                id="spainMatricula"
+                        <div className="flex flex-col gap-4 items-center">
+                            <FormField
+                                control={form.control}
+                                name="matricula"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Matrícula *</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Matrícula"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            <Label
-                                htmlFor="spainMatricula"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                                Formato Matrícula Española
-                            </Label>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    checked={isSpainMatricula}
+                                    onCheckedChange={() =>
+                                        setIsSpainMatricula(!isSpainMatricula)
+                                    }
+                                    id="spainMatricula"
+                                />
+                                <Label
+                                    htmlFor="spainMatricula"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                    Formato Matricula Española
+                                </Label>
+                            </div>
                         </div>
                     </div>
 
@@ -232,7 +268,7 @@ const EditarCoche: FC = () => {
                             control={form.control}
                             name="año"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Año</FormLabel>
                                     <FormControl>
                                         <Input
@@ -245,11 +281,12 @@ const EditarCoche: FC = () => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="color"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Color</FormLabel>
                                     <FormControl>
                                         <Input placeholder="Color" {...field} />
@@ -258,11 +295,12 @@ const EditarCoche: FC = () => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="tipo"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Tipo</FormLabel>
                                     <FormControl>
                                         <Select
@@ -296,8 +334,8 @@ const EditarCoche: FC = () => {
                             control={form.control}
                             name="numero_plaza"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nº Plaza *</FormLabel>
+                                <FormItem className="min-w-[120px]">
+                                    <FormLabel>Nº Plaza</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -309,16 +347,19 @@ const EditarCoche: FC = () => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="cliente_id"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Dueño del Coche *</FormLabel>
                                     <FormControl>
                                         <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value?.toString()}
+                                            onValueChange={(value) => {
+                                                field.onChange(value);
+                                            }}
+                                            value={field.value?.toString()}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecciona el dueño" />
@@ -326,16 +367,16 @@ const EditarCoche: FC = () => {
                                             <SelectContent>
                                                 {clientes.map(
                                                     ({
-                                                        id,
                                                         nombre,
                                                         apellidos,
-                                                        telefono,
+                                                        id,
+                                                        dni,
                                                     }) => (
                                                         <SelectItem
                                                             key={id}
                                                             value={id.toString()}
                                                         >
-                                                            {`${nombre} ${apellidos} - ${telefono}`}
+                                                            {`${nombre} ${apellidos} - ${dni}`}
                                                         </SelectItem>
                                                     )
                                                 )}
