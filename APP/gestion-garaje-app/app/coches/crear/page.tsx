@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
+import { useRouter } from "next/navigation";
 
 // Definición del esquema de validación con Zod
 const carSchema = z.object({
@@ -54,6 +55,8 @@ type Cliente = Tables<"clientes">;
 
 const CrearCoche: React.FC = () => {
     const supabase = createClient();
+    const router = useRouter();
+
     const [loading, setLoading] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [isSpainMatricula, setIsSpainMatricula] = useState(true);
@@ -117,6 +120,7 @@ const CrearCoche: React.FC = () => {
         alert("Coche creado exitosamente.");
         form.reset();
 
+        router.push("/coches");
         setLoading(false);
     };
 
@@ -305,13 +309,13 @@ const CrearCoche: React.FC = () => {
                                                         nombre,
                                                         apellidos,
                                                         id,
-                                                        telefono,
+                                                        dni,
                                                     }) => (
                                                         <SelectItem
                                                             key={id}
                                                             value={id.toString()}
                                                         >
-                                                            {`${nombre} ${apellidos} - ${telefono}`}
+                                                            {`${nombre} ${apellidos} - ${dni}`}
                                                         </SelectItem>
                                                     )
                                                 )}
