@@ -5,6 +5,8 @@ import Link from "next/link";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -21,11 +23,20 @@ const geistSans = Geist({
     subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
-}: Readonly<{
+}: {
     children: React.ReactNode;
-}>) {
+}) {
+    const supabase = createClient();
+    const {
+        data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+        redirect("/sign-in");
+    }
+
     return (
         <html
             lang="en"

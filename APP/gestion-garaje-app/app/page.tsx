@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
                     icon={<ParkingCircle className="h-6 w-6 text-primary" />}
                 />
                 <StatCard
-                    title="Vehículos totales"
+                    title="Vehículos totales (activos e inactivos)"
                     value="124"
                     change="+8 este mes"
                     icon={<Car className="h-6 w-6 text-primary" />}
