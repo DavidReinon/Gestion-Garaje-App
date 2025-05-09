@@ -3,7 +3,6 @@
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Tables, TablesUpdate } from "@/utils/types/supabase";
@@ -28,30 +27,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
 import { PostgrestError } from "@supabase/supabase-js";
+import {
+    carSchema,
+    CarType,
+    defaultValues,
+    spainMatriculaRegex,
+} from "@/app/coches/domain/carSchema";
+import type { CarFormData } from "@/app/coches/domain/carSchema";
 
-const carSchema = z.object({
-    marca: z.string().min(1, "La marca es obligatoria"),
-    modelo: z.string().min(1, "El modelo es obligatorio"),
-    matricula: z.string().min(1, "La matrícula es obligatoria"),
-    año: z.coerce
-        .number()
-        .min(1900, "El año no puede ser menor a 1900")
-        .max(
-            new Date().getFullYear(),
-            "El año no puede ser mayor al año actual"
-        )
-        .optional(),
-    color: z.string().optional(),
-    tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
-    numero_plaza: z.coerce
-        .number()
-        .min(1, "El número de plaza debe ser mayor a 0"),
-    cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
-});
-
-const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
-
-type CarFormData = z.infer<typeof carSchema>;
 type Car = Tables<"coches">;
 type Cliente = Tables<"clientes">;
 
@@ -81,14 +64,7 @@ const EditarCoche: FC = () => {
             )
         ),
         defaultValues: {
-            marca: "",
-            modelo: "",
-            matricula: "",
-            año: undefined,
-            color: "",
-            tipo: "Estandar",
-            numero_plaza: 0,
-            cliente_id: 0,
+            ...defaultValues,
         },
     });
 
@@ -117,7 +93,7 @@ const EditarCoche: FC = () => {
                     numero_plaza: data.numero_plaza || 0,
                     año: data.año || undefined,
                     color: data.color || "",
-                    tipo: data.tipo || "Estandar",
+                    tipo: data.tipo as CarType || CarType.Estandar,
                 };
                 console.log("DTO car:", initialDataDto);
 

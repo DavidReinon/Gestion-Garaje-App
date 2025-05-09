@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import React, { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Tables, TablesInsert } from "@/utils/types/supabase";
@@ -27,30 +26,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
 import { useRouter } from "next/navigation";
+import {
+    carSchema,
+    defaultValues,
+    spainMatriculaRegex,
+} from "@/app/coches/domain/carSchema";
+import type { CarFormData } from "@/app/coches/domain/carSchema";
 
-// Definición del esquema de validación con Zod
-const carSchema = z.object({
-    marca: z.string().min(1, "La marca es obligatoria"),
-    modelo: z.string().min(1, "El modelo es obligatorio"),
-    matricula: z.string().min(1, "La matrícula es obligatoria"),
-    año: z.coerce
-        .number()
-        .min(1900, "El año no puede ser menor a 1900")
-        .max(
-            new Date().getFullYear(),
-            "El año no puede ser mayor al año actual"
-        )
-        .optional(), // Convierte automáticamente a número y valida el rango
-    color: z.string().optional(),
-    tipo: z.enum(["Hibrido", "Electrico", "Estandar"]).optional(),
-    numero_plaza: z.coerce
-        .number()
-        .min(1, "El número de plaza debe ser mayor a 0"), // Convierte automáticamente a número y valida
-    cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
-});
-const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
-
-type CarFormData = z.infer<typeof carSchema>;
 type Cliente = Tables<"clientes">;
 
 const CrearCoche: React.FC = () => {
@@ -91,14 +73,7 @@ const CrearCoche: React.FC = () => {
             )
         ),
         defaultValues: {
-            marca: "",
-            modelo: "",
-            matricula: "",
-            año: 0,
-            color: "",
-            numero_plaza: 0,
-            tipo: "Estandar",
-            cliente_id: 0,
+            ...defaultValues,
         },
     });
 
