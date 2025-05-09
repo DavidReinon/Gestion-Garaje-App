@@ -1,12 +1,54 @@
+"use client";
+
 // app/page.tsx
 import { ParkingCircle, Car, Users } from "lucide-react";
 import WelcomeHeader from "@/components/welcome-header";
 import RecentActivity from "@/components/recent-activity";
 import StatCard from "@/components/stat-card";
-import getDashboardStats from "@/services/dashboard.service";
+import getDashboardStats, {
+    DashboardStats,
+} from "@/services/dashboard.service";
+import { useState } from "react";
+import { useMount } from "react-use";
 
-const HomePage: React.FC = async () => {
-    const stats = await getDashboardStats();
+const HomePage: React.FC = () => {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+
+    const { 
+        totalCars: totalVehicles, 
+        activeClients, 
+        occupiedSpaces, 
+        totalSpaces, 
+        monthlyChange
+    } = stats || {};
+
+    useMount(() => {
+        const savedStats = localStorage.getItem("dashboardStats");
+        const parsedSavedStats = savedStats ? JSON.parse(savedStats) : null;
+
+        const fetchStats = async () => {
+            const data = await getDashboardStats();
+            if (!data) {
+                console.error("Error fetching dashboard stats");
+                return;
+            }
+
+            if (JSON.stringify(parsedSavedStats) !== JSON.stringify(data)) {
+                setStats(data);
+                console.log("Datos actualizados:", data);
+                localStorage.setItem("dashboardStats", JSON.stringify(data));
+            } else {
+                console.log("Los datos no han cambiado.");
+            }
+        };
+
+        if (parsedSavedStats) {
+            setStats(parsedSavedStats);
+        }
+
+        fetchStats();
+    });
+
     console.log(stats);
     const activities = [
         {
@@ -34,20 +76,20 @@ const HomePage: React.FC = async () => {
             <div className="grid gap-4 md:grid-cols-3 mb-8">
                 <StatCard
                     title="Plazas Ocupadas"
-                    value="24/36"
+                    value={occupiedSpaces ? `${occupiedSpaces}/${totalSpaces}` : "Cargando..."}
                     change="-2"
                     icon={ParkingCircle}
                 />
                 <StatCard
-                    title="Vehículos totales (activos e inactivos)"
-                    value="124"
-                    change="+8"
+                    title="Vehículos totales registrados"
+                    value={totalVehicles || "Cargando..."}
+                    change={monthlyChange?.cars ? `+${monthlyChange.cars}` : "Cargando..."}
                     icon={Car}
                 />
                 <StatCard
                     title="Clientes activos"
-                    value="32"
-                    change="+3"
+                    value={activeClients || "Cargando..."}
+                    change={monthlyChange?.clients ? `+${monthlyChange.clients}` : "Cargando..."}
                     icon={Users}
                 />
             </div>

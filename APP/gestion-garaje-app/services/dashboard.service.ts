@@ -16,34 +16,63 @@ const supabase = createClient();
 
 const getDashboardStats = async (): Promise<DashboardStats> => {
     // 1. Obtener datos actuales
-    const { count: occupiedSpaces } = await supabase
+    const { count: occupiedSpaces, error: occupiedSpacesError } = await supabase
         .from("coches")
         .select("*", { count: "exact", head: true })
         .not("numero_plaza", "is", null);
 
-    const { count: totalCars } = await supabase
+    if (occupiedSpacesError) {
+        throw new Error("Failed to fetch occupied spaces data");
+    }
+
+    const { count: totalCars, error: totalCarsError } = await supabase
         .from("coches")
         .select("*", { count: "exact", head: true });
 
-    const { count: activeClients } = await supabase
+    if (totalCarsError) {
+        throw new Error("Failed to fetch total cars data");
+    }
+
+    const { count: activeClients, error: activeClientsError } = await supabase
         .from("clientes")
         .select("*", { count: "exact", head: true })
         .or("fecha_salida.is.null,fecha_salida.gt.now()");
+
+    if (activeClientsError) {
+        throw new Error("Failed to fetch active clients data");
+    }
 
     // 2. Calcular cambios mensuales
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const { count: monthlyCars } = await supabase
+    const { count: monthlyCars, error: carsError } = await supabase
         .from("coches")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", startOfMonth.toISOString());
+        .select("*", {
+            count: "exact",
+            head: true,
+        })
+        .gte("created_at", startOfMonth.toUTCString());
 
-    const { count: monthlyClients } = await supabase
+    if (carsError) {
+        throw new Error("Failed to fetch monthly cars data");
+    }
+
+    const { count: monthlyClients, error: clientsError } = await supabase
         .from("clientes")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", startOfMonth.toISOString());
+        .select("*", { 
+            count: "exact", 
+            head: true 
+        })
+        .gte("created_at", startOfMonth.toUTCString());
+
+    if (clientsError) {
+        throw new Error("Failed to fetch monthly clients data");
+    }
+    
+
+    console.log("DATOS: ", JSON.stringify(monthlyCars), monthlyClients);
 
     return {
         totalSpaces: TOTAL_SPACES,
@@ -72,7 +101,7 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
 //       details: string;
 //     }[];
 //   }
-  
+
 //   const getDashboardStats = async (): Promise<DashboardStats> => {
 //     // Consultas básicas
 //     const [
@@ -104,7 +133,7 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
 //         .order('updated_at', { ascending: false })
 //         .limit(3)
 //     ]);
-  
+
 //     // Procesar actividades recientes
 //     const recentActivities = [
 //       ...(recentClients?.map(cliente => ({
@@ -119,7 +148,7 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
 //       })) || [])
 //     ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 //      .slice(0, 5);
-  
+
 //     return {
 //       occupiedSpaces: occupiedSpaces || 0,
 //       totalSpaces: 36, // Valor configurable
@@ -129,7 +158,7 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
 //       recentActivities
 //     };
 //   };
-  
+
 //   // Función auxiliar
 //   const formatTimeAgo = (dateString: string) => {
 //     // Implementación de la función que convierte fechas a "Hace X tiempo"
@@ -137,3 +166,4 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
 //   };
 
 export default getDashboardStats;
+export type { DashboardStats };

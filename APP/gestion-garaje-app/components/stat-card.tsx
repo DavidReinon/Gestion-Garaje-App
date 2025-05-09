@@ -30,7 +30,7 @@ const StatCard = ({
                 <p
                     className={`text-xs ${isPositive ? "text-green-500" : "text-red-500"}`}
                 >
-                    {`${change} respecto al mes pasado`}
+                    {`${change} el ultimo mes`}
                 </p>
             </CardContent>
         </Card>
