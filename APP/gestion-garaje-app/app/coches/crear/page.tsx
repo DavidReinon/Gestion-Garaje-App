@@ -31,7 +31,7 @@ import {
     defaultValues,
     spainMatriculaRegex,
 } from "@/app/coches/domain/carSchema";
-import type { CarFormData } from "@/app/coches/domain/carSchema";
+import type { CarFormDataType } from "@/app/coches/domain/carSchema";
 
 type Cliente = Tables<"clientes">;
 
@@ -58,7 +58,7 @@ const CrearCoche: React.FC = () => {
         fetchClientes();
     }, [supabase]);
 
-    const form = useForm<CarFormData>({
+    const form = useForm<CarFormDataType>({
         resolver: zodResolver(
             carSchema.refine(
                 (
@@ -77,10 +77,11 @@ const CrearCoche: React.FC = () => {
         },
     });
 
-    const onSubmit = async (data: CarFormData) => {
+    const onSubmit = async (data: CarFormDataType) => {
         setLoading(true);
         const payload: TablesInsert<"coches"> = {
             ...data,
+            numero_plaza: data.numero_plaza === "" ? null : data.numero_plaza,
         };
 
         const { error } = await supabase.from("coches").insert([payload]);

@@ -33,7 +33,7 @@ import {
     defaultValues,
     spainMatriculaRegex,
 } from "@/app/coches/domain/carSchema";
-import type { CarFormData } from "@/app/coches/domain/carSchema";
+import type { CarFormDataType } from "@/app/coches/domain/carSchema";
 
 type Car = Tables<"coches">;
 type Cliente = Tables<"clientes">;
@@ -46,10 +46,10 @@ const EditarCoche: FC = () => {
 
     const [loading, setLoading] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [initialData, setInitialData] = useState<CarFormData | null>(null);
+    const [initialData, setInitialData] = useState<CarFormDataType | null>(null);
     const [isSpainMatricula, setIsSpainMatricula] = useState(true);
 
-    const form = useForm<CarFormData>({
+    const form = useForm<CarFormDataType>({
         resolver: zodResolver(
             carSchema.refine(
                 (
@@ -90,7 +90,7 @@ const EditarCoche: FC = () => {
                 console.log(data);
                 const initialDataDto = {
                     ...data,
-                    numero_plaza: data.numero_plaza || 0,
+                    numero_plaza: data.numero_plaza || undefined,
                     año: data.año || undefined,
                     color: data.color || "",
                     tipo: data.tipo as CarType || CarType.Estandar,
@@ -127,11 +127,12 @@ const EditarCoche: FC = () => {
         }
     }, [initialData, form]);
 
-    const onSubmit = async (data: CarFormData) => {
+    const onSubmit = async (data: CarFormDataType) => {
         setLoading(true);
 
         const payload: TablesUpdate<"coches"> = {
             ...data,
+            numero_plaza: data.numero_plaza === "" ? null : data.numero_plaza,
         };
 
         const { error } = await supabase

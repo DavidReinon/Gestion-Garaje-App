@@ -22,7 +22,9 @@ const carSchema = z.object({
     tipo: z.enum(Object.values(CarType) as [CarType, ...CarType[]]).optional(),
     numero_plaza: z.coerce
         .number()
-        .min(1, "El número de plaza debe ser mayor a 0"), // Convierte automáticamente a número y valida
+        .min(1, "El número de plaza debe ser mayor a 0")
+        .or(z.literal(""))
+        .optional(),
     cliente_id: z.coerce.number().min(1, "El cliente es obligatorio"),
 });
 
@@ -30,16 +32,16 @@ const defaultValues = {
     marca: "",
     modelo: "",
     matricula: "",
-    año: 0,
+    año: undefined,
     color: "",
     tipo: CarType.Estandar,
-    numero_plaza: 0,
+    numero_plaza: undefined,
     cliente_id: 0,
 };
 
 const spainMatriculaRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
 
-type CarFormData = z.infer<typeof carSchema>;
+type CarFormDataType = z.infer<typeof carSchema>;
 
 export { carSchema, defaultValues, spainMatriculaRegex, CarType };
-export type { CarFormData };
+export type { CarFormDataType };
