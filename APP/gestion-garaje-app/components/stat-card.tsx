@@ -4,18 +4,13 @@ import { LucideIcon } from "lucide-react";
 interface StatCardProps {
     title: string;
     value: string | number;
-    change: string;
+    change?: number;
     icon: LucideIcon;
     description?: string;
 }
 
-const StatCard = ({
-    title,
-    value,
-    change,
-    icon: Icon,
-}: StatCardProps) => {
-    const isPositive = !change.startsWith("-");
+const StatCard = ({ title, value, change, icon: Icon }: StatCardProps) => {
+    const isPositive = change ? change > 0 : false;
 
     return (
         <Card className="hover:shadow-md transition-shadow">
@@ -23,15 +18,18 @@ const StatCard = ({
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                     {title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 ms-3 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{value}</div>
-                <p
-                    className={`text-xs ${isPositive ? "text-green-500" : "text-red-500"}`}
-                >
-                    {`${change} el ultimo mes`}
-                </p>
+                {change && (
+                    <p
+                        className={`text-xs ${isPositive ? "text-green-500" : "text-gray-500"}`}
+                    >
+                        {isPositive ? "+" : ""}
+                        {change + " este mes"}
+                    </p>
+                )}
             </CardContent>
         </Card>
     );

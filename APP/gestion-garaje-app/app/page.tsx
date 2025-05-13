@@ -6,7 +6,7 @@ import WelcomeHeader from "@/components/welcome-header";
 import RecentActivity from "@/components/recent-activity";
 import StatCard from "@/components/stat-card";
 import getDashboardStats, {
-    DashboardStats,
+    DashboardStats
 } from "@/services/dashboard.service";
 import { useState } from "react";
 import { useMount } from "react-use";
@@ -14,12 +14,13 @@ import { useMount } from "react-use";
 const HomePage: React.FC = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
 
-    const { 
-        totalCars: totalVehicles, 
-        activeClients, 
-        occupiedSpaces, 
-        totalSpaces, 
-        monthlyChange
+    const {
+        totalCars: totalVehicles,
+        activeClients,
+        occupiedSpaces,
+        totalSpaces,
+        monthlyChange,
+        recentActivities = [],
     } = stats || {};
 
     useMount(() => {
@@ -76,25 +77,28 @@ const HomePage: React.FC = () => {
             <div className="grid gap-4 md:grid-cols-3 mb-8">
                 <StatCard
                     title="Plazas Ocupadas"
-                    value={occupiedSpaces ? `${occupiedSpaces}/${totalSpaces}` : "Cargando..."}
-                    change="-2"
+                    value={
+                        occupiedSpaces
+                            ? `${occupiedSpaces}/${totalSpaces}`
+                            : "Cargando..."
+                    }
                     icon={ParkingCircle}
                 />
                 <StatCard
                     title="Vehículos totales registrados"
                     value={totalVehicles || "Cargando..."}
-                    change={monthlyChange?.cars ? `+${monthlyChange.cars}` : "Cargando..."}
+                    change={monthlyChange?.cars}
                     icon={Car}
                 />
                 <StatCard
                     title="Clientes activos"
                     value={activeClients || "Cargando..."}
-                    change={monthlyChange?.clients ? `+${monthlyChange.clients}` : "Cargando..."}
+                    change={monthlyChange?.clients}
                     icon={Users}
                 />
             </div>
 
-            <RecentActivity activities={activities} />
+            <RecentActivity activities={recentActivities} />
         </div>
     );
 };

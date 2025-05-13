@@ -22,9 +22,15 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {activities.map((activity, index) => (
-                        <ActivityItem key={index} {...activity} />
-                    ))}
+                    {activities ? (
+                        activities.map((activity, index) => (
+                            <ActivityItem key={index} {...activity} />
+                        ))
+                    ) : (
+                        <div className="text-center text-muted-foreground">
+                            Actividad reciente no disponible
+                        </div>
+                    )}
                     <Button variant="ghost" className="w-full mt-4">
                         Ver toda la actividad{" "}
                         <ChevronRight className="ml-2 h-4 w-4" />

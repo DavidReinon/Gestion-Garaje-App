@@ -1,6 +1,13 @@
 // services/dashboard.service.ts
 import { createClient } from "@/utils/supabase/client";
 
+interface Activity {
+    time: string;
+    action: string;
+    details: string;
+    timestamp: Date;
+}
+
 interface DashboardStats {
     occupiedSpaces: number;
     totalSpaces: number;
@@ -10,69 +17,120 @@ interface DashboardStats {
         cars: number;
         clients: number;
     };
+    recentActivities: Activity[];
 }
+
 const TOTAL_SPACES = 36; // Total de plazas disponibles en el parking
 const supabase = createClient();
 
-const getDashboardStats = async (): Promise<DashboardStats> => {
-    // 1. Obtener datos actuales
-    const { count: occupiedSpaces, error: occupiedSpacesError } = await supabase
-        .from("coches")
-        .select("*", { count: "exact", head: true })
-        .not("numero_plaza", "is", null);
+// Función auxiliar para formatear fechas
+const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (occupiedSpacesError) {
-        throw new Error("Failed to fetch occupied spaces data");
-    }
+    if (diffInSeconds < 60) return `Hace ${diffInSeconds} segundos`;
+    if (diffInSeconds < 3600)
+        return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
+    if (diffInSeconds < 86400)
+        return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
 
-    const { count: totalCars, error: totalCarsError } = await supabase
-        .from("coches")
-        .select("*", { count: "exact", head: true });
+    const diffInDays = Math.floor(diffInSeconds / 86400);
+    return diffInDays === 1 ? "Ayer" : `Hace ${diffInDays} días`;
+};
 
-    if (totalCarsError) {
-        throw new Error("Failed to fetch total cars data");
-    }
-
-    const { count: activeClients, error: activeClientsError } = await supabase
+// Función para obtener actividades recientes combinadas
+const getRecentActivities = async (): Promise<Activity[]> => {
+    // Obtener últimos cambios en clientes
+    const { data: clientes, error: clientesError } = await supabase
         .from("clientes")
-        .select("*", { count: "exact", head: true })
-        .or("fecha_salida.is.null,fecha_salida.gt.now()");
+        .select(
+            "id, nombre, apellidos, fecha_entrada, fecha_salida, created_at, updated_at"
+        )
+        .order("updated_at", { ascending: false })
+        .limit(5);
 
-    if (activeClientsError) {
-        throw new Error("Failed to fetch active clients data");
+    if (clientesError) {
+        console.error("Error fetching client activities:", clientesError);
+        throw new Error("Failed to fetch client activities");
     }
 
-    // 2. Calcular cambios mensuales
+    // Obtener últimos cambios en coches
+    const { data: coches, error: cochesError } = await supabase
+        .from("coches")
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .limit(5);
+
+    if (cochesError) {
+        console.error("Error fetching car activities:", cochesError);
+        throw new Error("Failed to fetch car activities");
+    }
+
+    // Mapear actividades de clientes
+    const clientActivities = clientes.map((cliente) => ({
+        time: formatTimeAgo(cliente.updated_at),
+        action: cliente.fecha_salida
+            ? "Cliente dado de baja: "
+            : cliente.updated_at
+              ? "Cliente actualizado: "
+              : "Nuevo cliente creado: ",
+        details: `${cliente.nombre} ${cliente.apellidos}`,
+        timestamp: new Date(cliente.updated_at),
+    }));
+
+    // Mapear actividades de coches
+    const carActivities = coches.map((coche) => ({
+        time: formatTimeAgo(coche.updated_at),
+        action: !coche.numero_plaza
+            ? "Vehículo retirado: "
+            : coche.updated_at
+              ? "Vehículo actualizado: "
+              : "Nuevo vehículo creado: ",
+        details: `${coche.marca} ${coche.modelo} - ${coche.matricula}`,
+        timestamp: new Date(coche.updated_at),
+    }));
+
+    // Combinar y ordenar actividades
+    return [...clientActivities, ...carActivities]
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, 5); // Mostrar solo las 5 más recientes
+};
+
+const getDashboardStats = async (): Promise<DashboardStats> => {
+    // Obtener datos básicos en paralelo para mejor rendimiento
+
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const { count: monthlyCars, error: carsError } = await supabase
-        .from("coches")
-        .select("*", {
-            count: "exact",
-            head: true,
-        })
-        .gte("created_at", startOfMonth.toUTCString());
-
-    if (carsError) {
-        throw new Error("Failed to fetch monthly cars data");
-    }
-
-    const { count: monthlyClients, error: clientsError } = await supabase
-        .from("clientes")
-        .select("*", { 
-            count: "exact", 
-            head: true 
-        })
-        .gte("created_at", startOfMonth.toUTCString());
-
-    if (clientsError) {
-        throw new Error("Failed to fetch monthly clients data");
-    }
-    
-
-    console.log("DATOS: ", JSON.stringify(monthlyCars), monthlyClients);
+    const [
+        { count: occupiedSpaces },
+        { count: totalCars },
+        { count: activeClients },
+        { count: monthlyCars },
+        { count: monthlyClients },
+        recentActivities,
+    ] = await Promise.all([
+        supabase
+            .from("coches")
+            .select("*", { count: "exact", head: true })
+            .not("numero_plaza", "is", null),
+        supabase.from("coches").select("*", { count: "exact", head: true }),
+        supabase
+            .from("clientes")
+            .select("*", { count: "exact", head: true })
+            .or("fecha_salida.is.null,fecha_salida.gt.now()"),
+        supabase
+            .from("coches")
+            .select("*", { count: "exact", head: true })
+            .gte("created_at", startOfMonth.toUTCString()),
+        supabase
+            .from("clientes")
+            .select("*", { count: "exact", head: true })
+            .gte("created_at", startOfMonth.toUTCString()),
+        getRecentActivities(),
+    ]);
 
     return {
         totalSpaces: TOTAL_SPACES,
@@ -83,87 +141,9 @@ const getDashboardStats = async (): Promise<DashboardStats> => {
             cars: monthlyCars || 0,
             clients: monthlyClients || 0,
         },
+        recentActivities,
     };
 };
-// //Ejemplo mas completo de dashboard.service.ts
-// interface DashboardStats {
-//     occupiedSpaces: number;
-//     totalSpaces: number;
-//     totalCars: number;
-//     activeClients: number;
-//     monthlyChange: {
-//       cars: number;
-//       clients: number;
-//     };
-//     recentActivities: {
-//       time: string;
-//       action: string;
-//       details: string;
-//     }[];
-//   }
-
-//   const getDashboardStats = async (): Promise<DashboardStats> => {
-//     // Consultas básicas
-//     const [
-//       { count: occupiedSpaces },
-//       { count: totalCars },
-//       { count: activeClients },
-//       { data: recentClients },
-//       { data: recentCars }
-//     ] = await Promise.all([
-//       supabase
-//         .from('coches')
-//         .select('*', { count: 'exact', head: true })
-//         .not('numero_plaza', 'is', null),
-//       supabase
-//         .from('coches')
-//         .select('*', { count: 'exact', head: true }),
-//       supabase
-//         .from('clientes')
-//         .select('*', { count: 'exact', head: true })
-//         .or('fecha_salida.is.null,fecha_salida.gt.now()'),
-//       supabase
-//         .from('clientes')
-//         .select('id, nombre, apellidos, fecha_salida, updated_at')
-//         .order('updated_at', { ascending: false })
-//         .limit(3),
-//       supabase
-//         .from('coches')
-//         .select('id, matricula, cliente_id, numero_plaza, created_at, updated_at')
-//         .order('updated_at', { ascending: false })
-//         .limit(3)
-//     ]);
-
-//     // Procesar actividades recientes
-//     const recentActivities = [
-//       ...(recentClients?.map(cliente => ({
-//         time: formatTimeAgo(cliente.updated_at),
-//         action: cliente.fecha_salida ? 'Baja de cliente' : cliente.updated_at === cliente.created_at ? 'Nuevo cliente' : 'Actualización',
-//         details: `${cliente.nombre} ${cliente.apellidos}`,
-//       })) || []),
-//       ...(recentCars?.map(coche => ({
-//         time: formatTimeAgo(coche.updated_at),
-//         action: coche.numero_plaza ? 'Asignación de plaza' : 'Liberación de plaza',
-//         details: `Matrícula: ${coche.matricula}`,
-//       })) || [])
-//     ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-//      .slice(0, 5);
-
-//     return {
-//       occupiedSpaces: occupiedSpaces || 0,
-//       totalSpaces: 36, // Valor configurable
-//       totalCars: totalCars || 0,
-//       activeClients: activeClients || 0,
-//       monthlyChange: await getMonthlyChanges(),
-//       recentActivities
-//     };
-//   };
-
-//   // Función auxiliar
-//   const formatTimeAgo = (dateString: string) => {
-//     // Implementación de la función que convierte fechas a "Hace X tiempo"
-//     // ...
-//   };
 
 export default getDashboardStats;
 export type { DashboardStats };
