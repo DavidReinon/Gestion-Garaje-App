@@ -7,6 +7,7 @@ import { getColumns } from "./domain/columns";
 import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "lucide-react";
+import LoadingSpin from "@/components/loading-spin";
 
 const ClientesView: FC = () => {
     type Cliente = Tables<"clientes"> & {
@@ -75,9 +76,7 @@ const ClientesView: FC = () => {
                     </button>
                 </div>
                 {loading ? (
-                    <div className="flex justify-center items-center h-20">
-                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
-                    </div>
+                    <LoadingSpin heightContainer={20} /> 
                 ) : (
                     <DataTable columns={columns} data={clientes} />
                 )}

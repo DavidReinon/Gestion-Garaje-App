@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import DatePicker from "@/components/date-picker";
 import formatToLocalTimeZoneString from "@/utils/date-helper";
+import LoadingSpin from "@/components/loading-spin";
 
 const clientSchema = z
     .object({
@@ -164,9 +165,7 @@ const EditarCliente: FC = () => {
 
     if (!initialData) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-0 border-b-2 border-gray-900"></div>
-            </div>
+            <LoadingSpin heightContainer={'screen'} /> 
         );
     }
 
