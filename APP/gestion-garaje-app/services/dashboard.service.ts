@@ -37,7 +37,7 @@ const formatTimeAgo = (dateString: string): string => {
     }
     if (diffInSeconds < 86400) {
         const hours = Math.floor(diffInSeconds / 3600);
-        return `Hace ${hours} hora ${hours === 1 ? "hora" : "horas"}`;
+        return `Hace ${hours} ${hours === 1 ? "hora" : "horas"}`;
     }
 
     const diffInDays = Math.floor(diffInSeconds / 86400);
