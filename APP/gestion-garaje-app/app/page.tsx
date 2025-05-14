@@ -50,25 +50,6 @@ const HomePage: React.FC = () => {
         fetchStats();
     });
 
-    console.log(stats);
-    const activities = [
-        {
-            time: "Hace 10 min",
-            action: "Nuevo vehículo registrado",
-            details: "ABC-1234",
-        },
-        {
-            time: "Hace 25 min",
-            action: "Plaza liberada",
-            details: "Sector B - Plaza 12",
-        },
-        {
-            time: "Hace 1 hora",
-            action: "Pago registrado",
-            details: "Cliente #0452",
-        },
-    ];
-
     return (
         <div className="p-6">
             <WelcomeHeader userName="David" />

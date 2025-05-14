@@ -29,11 +29,16 @@ const formatTimeAgo = (dateString: string): string => {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return `Hace ${diffInSeconds} segundos`;
-    if (diffInSeconds < 3600)
-        return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
-    if (diffInSeconds < 86400)
-        return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
+    if (diffInSeconds < 60)
+        return `Hace ${diffInSeconds} ${diffInSeconds === 1 ? "segundo" : "segundos"}`;
+    if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `Hace ${minutes} ${minutes === 1 ? "minuto" : "minutos"}`;
+    }
+    if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `Hace ${hours} hora ${hours === 1 ? "hora" : "horas"}`;
+    }
 
     const diffInDays = Math.floor(diffInSeconds / 86400);
     return diffInDays === 1 ? "Ayer" : `Hace ${diffInDays} días`;
@@ -44,9 +49,7 @@ const getRecentActivities = async (): Promise<Activity[]> => {
     // Obtener últimos cambios en clientes
     const { data: clientes, error: clientesError } = await supabase
         .from("clientes")
-        .select(
-            "id, nombre, apellidos, fecha_entrada, fecha_salida, created_at, updated_at"
-        )
+        .select("*")
         .order("updated_at", { ascending: false })
         .limit(5);
 
@@ -67,24 +70,22 @@ const getRecentActivities = async (): Promise<Activity[]> => {
         throw new Error("Failed to fetch car activities");
     }
 
-    // Mapear actividades de clientes
     const clientActivities = clientes.map((cliente) => ({
         time: formatTimeAgo(cliente.updated_at),
         action: cliente.fecha_salida
             ? "Cliente dado de baja: "
-            : cliente.updated_at
+            : cliente.updated_at !== cliente.created_at
               ? "Cliente actualizado: "
               : "Nuevo cliente creado: ",
-        details: `${cliente.nombre} ${cliente.apellidos}`,
+        details: `${cliente.nombre} ${cliente.apellidos} - ${cliente.dni}`,
         timestamp: new Date(cliente.updated_at),
     }));
 
-    // Mapear actividades de coches
     const carActivities = coches.map((coche) => ({
         time: formatTimeAgo(coche.updated_at),
         action: !coche.numero_plaza
             ? "Vehículo retirado: "
-            : coche.updated_at
+            : coche.updated_at !== coche.created_at
               ? "Vehículo actualizado: "
               : "Nuevo vehículo creado: ",
         details: `${coche.marca} ${coche.modelo} - ${coche.matricula}`,
@@ -93,6 +94,11 @@ const getRecentActivities = async (): Promise<Activity[]> => {
 
     // Combinar y ordenar actividades
     return [...clientActivities, ...carActivities]
+        .filter(
+            (activity) =>
+                activity.timestamp instanceof Date &&
+                !isNaN(activity.timestamp.getTime())
+        ) // Validar timestamps válidos
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
         .slice(0, 5); // Mostrar solo las 5 más recientes
 };
