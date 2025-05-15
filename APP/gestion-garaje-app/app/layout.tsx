@@ -1,12 +1,12 @@
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import Link from "next/link";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { GlobalContextProvider } from "@/context/global-context";
+import { headers } from "next/headers";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -15,7 +15,7 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata = {
     metadataBase: new URL(defaultUrl),
     title: "Gestion Garaje",
-    description: "The fastest way to build apps with Next.js and Supabase",
+    description: "Gestion Garaje",
 };
 
 const geistSans = Geist({
@@ -29,13 +29,23 @@ export default async function RootLayout({
     children: React.ReactNode;
 }) {
     // const supabase = await createClient();
-    // const {
-    //     data: { session },
-    // } = await supabase.auth.getSession();
+    // const pathname = headers().get("x-current-path") || ""; // fallback si no existe
 
-    // if (!session) {
-    //     redirect("/sign-in");
+    // // Verifica si hay sesión (protección), excepto en rutas públicas
+    // const publicRoutes = ["/sign-in", "/sign-up", "/auth/callback"];
+    // if (!publicRoutes.includes(pathname)) {
+    //     const {
+    //         data: { session },
+    //     } = await supabase.auth.getSession();
+
+    //     if (!session) {
+    //         redirect("/sign-in");
+    //     }
     // }
+
+    // const {
+    //     data: { user },
+    // } = await supabase.auth.getUser();
 
     return (
         <html
@@ -44,20 +54,22 @@ export default async function RootLayout({
             suppressHydrationWarning
         >
             <body className="text-foreground">
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <SidebarProvider>
-                        <AppSidebar />
-                        <div className="flex flex-col w-full min-h-screen mt-2">
-                            <SidebarTrigger />
-                            <main className="w-full">{children}</main>
-                        </div>
-                    </SidebarProvider>
-                </ThemeProvider>
+                <GlobalContextProvider user={null}>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <SidebarProvider>
+                            <AppSidebar />
+                            <div className="flex flex-col w-full min-h-screen mt-2">
+                                <SidebarTrigger />
+                                <main className="w-full">{children}</main>
+                            </div>
+                        </SidebarProvider>
+                    </ThemeProvider>
+                </GlobalContextProvider>
             </body>
         </html>
     );
