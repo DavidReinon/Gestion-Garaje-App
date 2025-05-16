@@ -6,6 +6,7 @@ import React, { createContext, useContext, ReactNode } from "react";
 
 type GlobalContextType = {
     username: string;
+    user: User | null;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -22,7 +23,7 @@ const GlobalContextProvider = ({
         : "Invitado";
 
     return (
-        <GlobalContext.Provider value={{ username }}>
+        <GlobalContext.Provider value={{ username, user }}>
             {children}
         </GlobalContext.Provider>
     );

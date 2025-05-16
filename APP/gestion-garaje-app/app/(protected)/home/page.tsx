@@ -13,7 +13,7 @@ import { useMount } from "react-use";
 import { useGlobalContext } from "@/context/global-context";
 
 const HomePage: React.FC = () => {
-    const username = useGlobalContext().username;
+    const { username } = useGlobalContext();
     const [stats, setStats] = useState<DashboardStats | null>(null);
 
     const {
