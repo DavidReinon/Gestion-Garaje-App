@@ -112,14 +112,6 @@ const EditarCliente: FC = () => {
 
             console.log(data);
 
-            //Recomendacion del framework para no enviar nulls al formulario
-            // const sanitizedData = Object.fromEntries(
-            //     Object.entries(data).map(([key, value]) => [
-            //         key,
-            //         value === null ? "" : value,
-            //     ])
-            // );
-
             setInitialData(data);
             form.reset({
                 ...data,

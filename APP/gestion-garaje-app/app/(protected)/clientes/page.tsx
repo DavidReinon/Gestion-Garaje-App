@@ -1,10 +1,10 @@
-"use client"; // Para usar hooks en un componente de Next.js 13+
+"use client";
 
 import { FC, useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client"; // Importamos Supabase desde utils
+import { createClient } from "@/utils/supabase/client";
 import { DataTable } from "@/components/data-table";
 import { getColumns } from "./domain/columns";
-import { Tables } from "@/utils/types/supabase"; // Importamos el tipo Tables desde utils
+import { Tables } from "@/utils/types/supabase";
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "lucide-react";
 import LoadingSpin from "@/components/loading-spin";
@@ -67,7 +67,7 @@ const ClientesView: FC = () => {
                 </p>
                 <div className="flex justify-start mb-3">
                     <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                         onClick={() => router.push("clientes/crear")}
                     >
                         <div className="flex gap-1 align-middle">

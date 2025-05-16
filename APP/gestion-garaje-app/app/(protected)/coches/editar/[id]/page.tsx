@@ -32,8 +32,8 @@ import {
     CarType,
     defaultValues,
     spainMatriculaRegex,
-} from "@/app/coches/domain/carSchema";
-import type { CarFormDataType } from "@/app/coches/domain/carSchema";
+    type CarFormDataType,
+} from "@/app/(protected)/coches/domain/carSchema";
 import LoadingSpin from "@/components/loading-spin";
 
 type Car = Tables<"coches">;
@@ -47,7 +47,9 @@ const EditarCoche: FC = () => {
 
     const [loading, setLoading] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
-    const [initialData, setInitialData] = useState<CarFormDataType | null>(null);
+    const [initialData, setInitialData] = useState<CarFormDataType | null>(
+        null
+    );
     const [isSpainMatricula, setIsSpainMatricula] = useState(true);
 
     const form = useForm<CarFormDataType>({
@@ -94,7 +96,7 @@ const EditarCoche: FC = () => {
                     numero_plaza: data.numero_plaza || undefined,
                     año: data.año || undefined,
                     color: data.color || "",
-                    tipo: data.tipo as CarType || CarType.Estandar,
+                    tipo: (data.tipo as CarType) || CarType.Estandar,
                 };
                 console.log("DTO car:", initialDataDto);
 
@@ -154,9 +156,7 @@ const EditarCoche: FC = () => {
     };
 
     if (!initialData) {
-        return (
-            <LoadingSpin heightContainer={'screen'} /> 
-        );
+        return <LoadingSpin heightContainer={"screen"} />;
     }
 
     return (

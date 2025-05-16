@@ -30,8 +30,8 @@ import {
     carSchema,
     defaultValues,
     spainMatriculaRegex,
-} from "@/app/coches/domain/carSchema";
-import type { CarFormDataType } from "@/app/coches/domain/carSchema";
+    type CarFormDataType,
+} from "@/app/(protected)/coches/domain/carSchema";
 
 type Cliente = Tables<"clientes">;
 
