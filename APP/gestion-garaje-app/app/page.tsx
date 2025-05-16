@@ -1,7 +1,7 @@
-import HomePage from "./home/page";
+import { redirect } from "next/navigation";
 
 const App: React.FC = () => {
-    return <HomePage />;
+    redirect("/home");
 };
 
 export default App;
