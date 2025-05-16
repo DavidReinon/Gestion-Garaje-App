@@ -1,5 +1,6 @@
 "use client";
 
+import { userMap } from "@/utils/users-mapper";
 import { User } from "@supabase/supabase-js";
 import React, { createContext, useContext, ReactNode } from "react";
 
@@ -16,9 +17,9 @@ const GlobalContextProvider = ({
     user: User | null;
     children: ReactNode;
 }) => {
-    console.log("Global Context Provider");
-    console.log(user);
-    const [username] = user?.user_metadata?.full_name || "";
+    const username = user?.email
+        ? userMap[user.email] || user.email.split("@")[0] || "Invitado"
+        : "Invitado";
 
     return (
         <GlobalContext.Provider value={{ username }}>

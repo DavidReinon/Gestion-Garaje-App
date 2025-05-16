@@ -27,7 +27,7 @@ import { usePathname } from "next/navigation"; // Importamos el hook usePathname
 const items = [
     {
         title: "Inicio",
-        url: "/",
+        url: "/home",
         icon: Home,
     },
     {

@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { GlobalContextProvider } from "@/context/global-context";
 import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function ProtectesLayout({
     children,
@@ -14,7 +14,7 @@ export default async function ProtectesLayout({
 
     const {
         data: { session },
-    } = await supabase.auth.getSession();
+    } = await (await supabase).auth.getSession();
 
     if (!session) {
         redirect("/sign-in");
@@ -22,7 +22,7 @@ export default async function ProtectesLayout({
 
     const {
         data: { user },
-    } = await supabase.auth.getUser();
+    } = await (await supabase).auth.getUser();
 
     return (
         <GlobalContextProvider user={user}>
