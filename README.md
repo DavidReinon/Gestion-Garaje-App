@@ -30,7 +30,7 @@ Accede y prueba la aplicación en producción.
 
 > [!WARNING]
 > Se recomienda no eliminar muchos registros al probar la app. 
-Ya que la idea es poder modificar, y dar de alta o de baja un coche (mediante las fechas de entrada y de salida) pero seguir teniendo registrados tambien todos los coches que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo información de valor y tampoco saldría en la actividad reciente.
+Ya que la idea es poder modificarlos, y dar de alta o de baja un usuario (mediante las fechas de entrada y de salida) pero seguir teniendo registrados tambien todos los que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo información de valor y tampoco saldría en la actividad reciente.
 >
 
 > [!NOTE]
@@ -42,4 +42,4 @@ Ya que la idea es poder modificar, y dar de alta o de baja un coche (mediante la
 
 ---
 
-**¡Espero que te guste la app de gestion tu garaje!**
+**¡Espero que te guste la app de Gestiona tu Garaje!**
