@@ -28,17 +28,21 @@ Explora el diseño visual de la aplicación que se planteo y sirvio como una gui
 
 Accede y prueba la aplicación en producción.
 
-> [!WARNING]
-> Se recomienda no eliminar muchos registros al probar la app. 
-Ya que la idea es poder modificarlos, y dar de alta o de baja un usuario (mediante las fechas de entrada y de salida) pero seguir teniendo registrados tambien todos los que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo información de valor y tampoco saldría en la actividad reciente.
->
-
 > [!NOTE]
 > Usuario para acceder como invitado:
 >
 > - email: <invitado@invitado.com>
 > - contraseña: 1234
 >
+
+> [!WARNING]
+> Se recomienda no eliminar muchos registros al probar la app. 
+Ya que la idea es poder modificarlos, y dar de alta o de baja un usuario (mediante las fechas de entrada y de salida) pero seguir teniendo registrados tambien todos los que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo información de valor y tampoco saldría en la actividad reciente.
+>
+
+> [!TIP]
+> Para retirar un vehiculo del garaje hay que editarlo y eliminar su numero de plaza.
+> Para dar de baja un cliente (no eliminarlo del registro) hay que editarlo y especificar su fecha de salida. 
 
 ---
 
