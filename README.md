@@ -37,12 +37,12 @@ Accede y prueba la aplicación en producción.
 
 > [!WARNING]
 > Se recomienda no eliminar muchos registros al probar la app. 
-Ya que la idea es poder modificarlos, y dar de alta o de baja un usuario (mediante las fechas de entrada y de salida) pero seguir teniendo registrados tambien todos los que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo información de valor y tampoco saldría en la actividad reciente.
+Ya que la idea es poder modificarlos, y dar de alta o de baja, pero seguir teniendo registrados tambien todos los clientes y coches que usarón el garaje en el pasado. Si lo eliminas estarías perdiendo esta información de valor y tampoco saldría en la actividad reciente.
 >
 
 > [!TIP]
-> Para retirar un vehiculo del garaje hay que editarlo y eliminar su numero de plaza.
-> Para dar de baja un cliente (no eliminarlo del registro) hay que editarlo y especificar su fecha de salida. 
+> - Para retirar un vehiculo del garaje hay que editarlo y eliminar su numero de plaza.
+> - Para dar de baja un cliente (no eliminarlo del registro) hay que editarlo y especificar su fecha de salida. 
 
 ---
 
