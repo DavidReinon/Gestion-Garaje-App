@@ -8,22 +8,28 @@ import { Tables } from "@/utils/types/supabase";
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "lucide-react";
 import LoadingSpin from "@/components/loading-spin";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { set } from "date-fns";
+import { ClientesFilter } from "@/features/clientes/types/types";
+
+type Cliente = Tables<"clientes"> & {
+    coche?: string;
+    matricula?: string;
+};
 
 const ClientesView: FC = () => {
-    type Cliente = Tables<"clientes"> & {
-        coche?: string;
-        matricula?: string;
-    };
-
     const [allClients, setAllClients] = useState<Cliente[]>([]);
     const [filteredClients, setFilteredClients] = useState<Cliente[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [showActiveClients, setShowActiveClients] = useState<boolean>(true);
-    const [showInactiveClients, setShowInactiveClients] =
-        useState<boolean>(false);
+    const [filterOption, setFilterOption] = useState<ClientesFilter>(
+        ClientesFilter.Activos
+    );
 
     const supabase = createClient();
     const router = useRouter();
@@ -71,27 +77,33 @@ const ClientesView: FC = () => {
         fetchClientes();
     }, [supabase]); // Se ejecutará al montar el componente, igual que sin dependencias '[]'
 
-    const filterClients = () => {
-        if (showActiveClients && !showInactiveClients) {
-            setFilteredClients(
-                allClients.filter(
-                    (c) => c.fecha_salida === "-" || c.fecha_salida === null
-                )
-            );
-            return;
-        }
+    useEffect(() => {
+        filterClients();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filterOption, allClients]);
 
-        if (!showActiveClients && showInactiveClients) {
-            //TODO: Hacer también que se compare si la fecha de salida es superior a la fecha actual,
-            // para que si un cliente tiene una fecha de salida en el futuro, se considere activo
-            setFilteredClients(
-                allClients.filter(
-                    (c) => c.fecha_salida !== "-" && c.fecha_salida !== null
-                )
-            );
-            return;
+    const filterClients = () => {
+        switch (filterOption) {
+            case "activos":
+                setFilteredClients(
+                    allClients.filter(
+                        (c) => c.fecha_salida === "-" || c.fecha_salida === null
+                    )
+                );
+                break;
+            case "inactivos":
+                setFilteredClients(
+                    allClients.filter(
+                        (c) => c.fecha_salida !== "-" && c.fecha_salida !== null
+                    )
+                );
+                break;
+            case "todos":
+                setFilteredClients(allClients);
+                break;
+            default:
+                setFilteredClients(allClients);
         }
-        setFilteredClients(allClients);
     };
 
     return (
@@ -103,47 +115,41 @@ const ClientesView: FC = () => {
             <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
                 <div className="flex justify-start mb-3">
                     <button
-                        //TODO:: Cambiar hover a mas claro
-                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-500/80 transition"
                         onClick={() => router.push("clientes/crear")}
                     >
                         <div className="flex gap-1 align-middle">
-                            <PlusIcon className="w-4" /> Añadir
+                            Añadir <PlusIcon className="w-4" />
                         </div>
                     </button>
-                    <div className="flex flex-1 justify-end items-center gap-12">
-                        <div className="flex items-center gap-2">
-                            <Checkbox
-                                checked={showInactiveClients}
-                                onCheckedChange={() =>
-                                    setShowInactiveClients(!showInactiveClients)
-                                }
-                                id="showInactiveClients"
-                                onClick={filterClients}
-                            />
-                            <Label
-                                htmlFor="showInactiveClients"
-                                className="text-sm font-medium leading-none"
-                            >
-                                Mostrar Clientes Antiguos
-                            </Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Checkbox
-                                checked={showActiveClients}
-                                onCheckedChange={() =>
-                                    setShowActiveClients(!showActiveClients)
-                                }
-                                id="showActiveClients"
-                                onClick={filterClients}
-                            />
-                            <Label
-                                htmlFor="showActiveClients"
-                                className="text-sm font-medium leading-none"
-                            >
-                                Mostrar Clientes Activos
-                            </Label>
-                        </div>
+                    <div className="flex flex-1 justify-end items-center gap-4">
+                        <Label
+                            htmlFor="filterSelect"
+                            className="text-sm font-medium"
+                        >
+                            Filtrar clientes:
+                        </Label>
+                        <Select
+                            value={filterOption}
+                            onValueChange={(value) =>
+                                setFilterOption(value as ClientesFilter)
+                            }
+                        >
+                            <SelectTrigger className="w-36" id="filterSelect">
+                                <SelectValue placeholder="Seleccionar filtro" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ClientesFilter.Activos}>
+                                    Activos
+                                </SelectItem>
+                                <SelectItem value={ClientesFilter.Inactivos}>
+                                    Antiguos
+                                </SelectItem>
+                                <SelectItem value={ClientesFilter.Todos}>
+                                    Todos
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
                 {loading ? (

@@ -32,6 +32,10 @@ export const getColumns = (
         accessorKey: "fecha_entrada",
         header: "Fecha Entrada",
     },
+    {
+        accessorKey: "fecha_salida",
+        header: "Fecha Salida",
+    },
     { accessorKey: "coche", header: "Coche" },
     { accessorKey: "matricula", header: "Matrícula" },
     {
