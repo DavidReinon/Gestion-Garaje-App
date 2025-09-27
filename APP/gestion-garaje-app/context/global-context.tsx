@@ -17,6 +17,7 @@ const GlobalContextProvider = ({
     user: User | null;
     children: ReactNode;
 }) => {
+    //TODO: Cambiar para que renderice el nombre real del usuario separando con el @
     const username = user?.email?.startsWith("t")
         ? "Toni"
         : user?.email?.startsWith("d")
