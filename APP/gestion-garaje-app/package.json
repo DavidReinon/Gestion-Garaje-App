@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
-    "i:l": "npm install --legacy-peer-deps"
+    "lpd": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
