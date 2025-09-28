@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ClientesFilter } from "@/features/clientes/types/types";
+import { Separator } from "@/components/ui/separator";
 
 type Cliente = Tables<"clientes"> & {
     coche?: string;
@@ -108,50 +109,52 @@ const ClientesView: FC = () => {
 
     return (
         <div className="flex flex-col justify-center ms-5 mt-10">
-            <h1 className="text-2xl font-bold mb-2">Clientes</h1>
+            <h1 className="text-2xl font-bold">Clientes</h1>
             <p className="text-sm text-gray-500 mb-3">
                 Aquí puedes ver la lista de clientes registrados.
             </p>
-            <div className="flex-1 max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
-                <div className="flex justify-start mb-3">
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-500/80 transition"
-                        onClick={() => router.push("clientes/crear")}
-                    >
-                        <div className="flex gap-1 align-middle">
-                            Añadir <PlusIcon className="w-4" />
-                        </div>
-                    </button>
-                    <div className="flex flex-1 justify-end items-center gap-4">
-                        <Label
-                            htmlFor="filterSelect"
-                            className="text-sm font-medium"
-                        >
-                            Filtrar clientes:
-                        </Label>
-                        <Select
-                            value={filterOption}
-                            onValueChange={(value) =>
-                                setFilterOption(value as ClientesFilter)
-                            }
-                        >
-                            <SelectTrigger className="w-36" id="filterSelect">
-                                <SelectValue placeholder="Seleccionar filtro" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={ClientesFilter.Activos}>
-                                    Activos
-                                </SelectItem>
-                                <SelectItem value={ClientesFilter.Inactivos}>
-                                    Antiguos
-                                </SelectItem>
-                                <SelectItem value={ClientesFilter.Todos}>
-                                    Todos
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+            <Separator className="my-4 " />
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 mb-3 w-full max-w-4xl">
+                <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-500/80 transition"
+                    onClick={() => router.push("clientes/crear")}
+                >
+                    <div className="flex gap-1 align-middle">
+                        Añadir <PlusIcon className="w-4" />
                     </div>
+                </button>
+
+                <div className="flex items-center gap-4">
+                    <Label
+                        htmlFor="filterSelect"
+                        className="text-sm font-medium"
+                    >
+                        Filtrar clientes:
+                    </Label>
+                    <Select
+                        value={filterOption}
+                        onValueChange={(value) =>
+                            setFilterOption(value as ClientesFilter)
+                        }
+                    >
+                        <SelectTrigger className="w-32" id="filterSelect">
+                            <SelectValue placeholder="Seleccionar filtro" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={ClientesFilter.Activos}>
+                                Activos
+                            </SelectItem>
+                            <SelectItem value={ClientesFilter.Inactivos}>
+                                Antiguos
+                            </SelectItem>
+                            <SelectItem value={ClientesFilter.Todos}>
+                                Todos
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
+            </div>
+            <div className="flex-1 w-full max-w-4xl p-4 rounded-lg bg-neutral-50 shadow-md overflow-x-auto">
                 {loading ? (
                     <LoadingSpin heightContainer={20} />
                 ) : (
