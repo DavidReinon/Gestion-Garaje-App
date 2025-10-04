@@ -21,6 +21,10 @@ export const getColumns = (
         header: "Apellidos",
     },
     {
+        accessorKey: "dni",
+        header: "DNI",
+    },
+    {
         accessorKey: "telefono",
         header: "Teléfono",
     },
@@ -38,6 +42,7 @@ export const getColumns = (
     },
     { accessorKey: "coche", header: "Coche" },
     { accessorKey: "matricula", header: "Matrícula" },
+    { accessorKey: "numero_plaza", header: "Plaza" },
     {
         id: "acciones",
         header: "Acciones",

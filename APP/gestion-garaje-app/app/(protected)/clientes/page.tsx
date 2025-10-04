@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 type Cliente = Tables<"clientes"> & {
     coche?: string;
     matricula?: string;
+    numero_plaza?: string;
 };
 
 const ClientesView: FC = () => {
@@ -42,7 +43,8 @@ const ClientesView: FC = () => {
             setLoading(true);
             const { data, error } = await supabase
                 .from("clientes")
-                .select(`*, coches (marca, modelo, matricula)`); // JOIN con "coches"
+                .select(`*, coches (marca, modelo, matricula, numero_plaza)`) // JOIN con "coches"
+                .order("fecha_entrada", { ascending: false });
 
             if (error) {
                 console.error("Error al obtener clientes:", error);
@@ -50,7 +52,6 @@ const ClientesView: FC = () => {
                 return;
             }
 
-            console.log(data);
             const clientesFinalData = data.map((cliente) => ({
                 ...cliente,
                 coche:
@@ -58,6 +59,8 @@ const ClientesView: FC = () => {
                         ? `${cliente.coches[0]?.marca} ${cliente.coches[0]?.modelo}`
                         : "-",
                 matricula: cliente.coches[0]?.matricula || "-",
+                numero_plaza: cliente.coches[0]?.numero_plaza || "-",
+                //TODO: add dayjs to format dates
                 fecha_entrada: new Date(
                     cliente.fecha_entrada
                 ).toLocaleDateString("es-ES"),
