@@ -76,7 +76,7 @@ const ClientesView: FC = () => {
         };
 
         fetchClientes();
-    }, [supabase]); // Se ejecutará al montar el componente, igual que sin dependencias '[]'
+    }, [supabase]);
 
     useEffect(() => {
         filterClients();
