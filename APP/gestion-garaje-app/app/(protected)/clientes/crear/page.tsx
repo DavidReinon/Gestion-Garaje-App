@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import DatePicker from "@/components/date-picker";
 import formatToLocalTimeZoneString from "@/utils/date-helper";
+import { useRouter } from "next/navigation";
 
 // Definición del esquema de validación con Zod
 const clientSchema = z
@@ -71,6 +72,8 @@ type ClientFormData = z.infer<typeof clientSchema>;
 const CrearCliente: FC = () => {
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
+
+    const router = useRouter();
 
     // Inicialización del formulario con react-hook-form y zodResolver
     const form = useForm<ClientFormData>({
@@ -349,9 +352,25 @@ const CrearCliente: FC = () => {
                             )}
                         />
                     </div>
-                    <Button className="mt-5" type="submit" disabled={loading}>
-                        {loading ? "Creando..." : "Crear Cliente"}
-                    </Button>
+                    <div className="flex mt-5 justify-center gap-2">
+                        <Button
+                            className="w-full bg-destructive hover:bg-destructive/80"
+                            disabled={loading}
+                            onClick={() => {
+                                router.push("/clientes");
+                                form.reset();
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            className="w-full"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? "Creando..." : "Crear Cliente"}
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
