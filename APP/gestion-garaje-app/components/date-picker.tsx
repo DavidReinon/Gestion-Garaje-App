@@ -47,7 +47,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                         {date ? (
                             format(date, "PPP")
                         ) : (
-                            <span>Seleccionar fecha</span>
+                            <span>Seleccionar</span>
                         )}
                     </Button>
                 </PopoverTrigger>
