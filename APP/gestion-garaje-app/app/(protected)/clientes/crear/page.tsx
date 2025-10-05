@@ -32,7 +32,7 @@ const CrearCliente: FC = () => {
             setLoading(false);
             return;
         }
-        router.push("/clientes");
+        router.push("/coches/crear");
         alert("Cliente creado exitosamente.");
         setLoading(false);
     };
