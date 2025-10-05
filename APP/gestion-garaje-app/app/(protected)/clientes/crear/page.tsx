@@ -230,12 +230,12 @@ const CrearCliente: FC = () => {
                             </FormItem>
                         )}
                     />
-                    <div className="flex gap-4">
+                    <div className="w-full flex flex-wrap gap-4">
                         <FormField
                             control={form.control}
                             name="codigo_postal"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Código Postal *</FormLabel>
                                     <FormControl>
                                         <Input
@@ -252,7 +252,7 @@ const CrearCliente: FC = () => {
                             control={form.control}
                             name="poblacion"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Población *</FormLabel>
                                     <FormControl>
                                         <Input
@@ -269,7 +269,7 @@ const CrearCliente: FC = () => {
                             control={form.control}
                             name="provincia"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[120px]">
                                     <FormLabel>Provincia *</FormLabel>
                                     <FormControl>
                                         <Input
@@ -316,7 +316,7 @@ const CrearCliente: FC = () => {
                         )}
                     />
 
-                    <div className="flex gap-4">
+                    <div className="w-full flex gap-4">
                         <FormField
                             control={form.control}
                             name="fecha_entrada"
