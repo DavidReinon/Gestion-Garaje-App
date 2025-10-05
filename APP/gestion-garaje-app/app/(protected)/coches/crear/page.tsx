@@ -111,13 +111,28 @@ const CrearCoche: React.FC = () => {
                     <FormDescription>
                         Los campos marcados con * son obligatorios
                     </FormDescription>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            checked={isSpainMatricula}
+                            onCheckedChange={() =>
+                                setIsSpainMatricula(!isSpainMatricula)
+                            }
+                            id="spainMatricula"
+                        />
+                        <Label
+                            htmlFor="spainMatricula"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Formato Matricula Española
+                        </Label>
+                    </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                         <FormField
                             control={form.control}
                             name="marca"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[100px]">
                                     <FormLabel>Marca *</FormLabel>
                                     <FormControl>
                                         <Input placeholder="Marca" {...field} />
@@ -131,7 +146,7 @@ const CrearCoche: React.FC = () => {
                             control={form.control}
                             name="modelo"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex-1 min-w-[100px]">
                                     <FormLabel>Modelo *</FormLabel>
                                     <FormControl>
                                         <Input
@@ -144,48 +159,30 @@ const CrearCoche: React.FC = () => {
                             )}
                         />
 
-                        <div className="flex flex-col gap-4 items-center">
-                            <FormField
-                                control={form.control}
-                                name="matricula"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Matrícula *</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Matrícula"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    checked={isSpainMatricula}
-                                    onCheckedChange={() =>
-                                        setIsSpainMatricula(!isSpainMatricula)
-                                    }
-                                    id="spainMatricula"
-                                />
-                                <Label
-                                    htmlFor="spainMatricula"
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                    Formato Matricula Española
-                                </Label>
-                            </div>
-                        </div>
+                        <FormField
+                            control={form.control}
+                            name="matricula"
+                            render={({ field }) => (
+                                <FormItem className="flex-1 min-w-[100px]">
+                                    <FormLabel>Matrícula *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Matrícula"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                         <FormField
                             control={form.control}
                             name="año"
                             render={({ field }) => (
-                                <FormItem className="flex-1 min-w-[120px]">
+                                <FormItem className="flex-1 min-w-[90px]">
                                     <FormLabel>Año</FormLabel>
                                     <FormControl>
                                         <Input
@@ -246,17 +243,17 @@ const CrearCoche: React.FC = () => {
                         />
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                         <FormField
                             control={form.control}
                             name="numero_plaza"
                             render={({ field }) => (
-                                <FormItem className="min-w-[120px]">
+                                <FormItem className="flex-1 min-w-[80px]">
                                     <FormLabel>Nº Plaza</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
-                                            placeholder="Nº Plaza"
+                                            placeholder="1-36"
                                             {...field}
                                         />
                                     </FormControl>
@@ -269,7 +266,7 @@ const CrearCoche: React.FC = () => {
                             control={form.control}
                             name="cliente_id"
                             render={({ field }) => (
-                                <FormItem className="flex-1 min-w-[120px]">
+                                <FormItem className="flex-1 min-w-[140px]">
                                     <FormLabel>Dueño del Coche *</FormLabel>
                                     <FormControl>
                                         <Select
@@ -309,10 +306,7 @@ const CrearCoche: React.FC = () => {
                             type="button"
                             className="w-full bg-destructive hover:bg-destructive/80"
                             disabled={loading}
-                            onClick={() => {
-                                router.push("/coches");
-                                form.reset();
-                            }}
+                            onClick={() => router.push("/coches")}
                         >
                             Cancelar
                         </Button>
