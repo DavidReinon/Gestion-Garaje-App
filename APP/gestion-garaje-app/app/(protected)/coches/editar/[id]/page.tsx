@@ -365,9 +365,26 @@ const EditarCoche: FC = () => {
                         />
                     </div>
 
-                    <Button className="mt-5" type="submit" disabled={loading}>
-                        {loading ? "Actualizando..." : "Actualizar Coche"}
-                    </Button>
+                    <div className="flex mt-5 justify-center gap-2">
+                        <Button
+                            type="button"
+                            className="w-full bg-destructive hover:bg-destructive/80"
+                            disabled={loading}
+                            onClick={() => {
+                                router.push("/coches");
+                                form.reset();
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            className="w-full"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? "Actualizando..." : "Aceptar"}
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>

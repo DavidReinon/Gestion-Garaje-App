@@ -354,6 +354,7 @@ const CrearCliente: FC = () => {
                     </div>
                     <div className="flex mt-5 justify-center gap-2">
                         <Button
+                            type="button"
                             className="w-full bg-destructive hover:bg-destructive/80"
                             disabled={loading}
                             onClick={() => {
@@ -368,7 +369,7 @@ const CrearCliente: FC = () => {
                             type="submit"
                             disabled={loading}
                         >
-                            {loading ? "Creando..." : "Crear Cliente"}
+                            {loading ? "Creando..." : "Aceptar"}
                         </Button>
                     </div>
                 </form>

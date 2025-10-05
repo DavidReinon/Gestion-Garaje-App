@@ -57,7 +57,7 @@ const CochesView: FC = () => {
                 <div className="flex justify-start mb-3">
                     <button
                         onClick={() => router.push("coches/crear")}
-                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-500/80"
                     >
                         <div className="flex gap-1 align-middle">
                             <PlusIcon className="w-4" /> Añadir
