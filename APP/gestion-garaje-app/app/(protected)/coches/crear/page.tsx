@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-label";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     carSchema,
     defaultValues,
@@ -38,6 +38,12 @@ type Cliente = Tables<"clientes">;
 const CrearCoche: React.FC = () => {
     const supabase = createClient();
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const preselectedClientIdParam = searchParams.get("cliente_id");
+    const preselectedClientId = preselectedClientIdParam
+        ? Number(preselectedClientIdParam)
+        : null;
 
     const [loading, setLoading] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -61,9 +67,8 @@ const CrearCoche: React.FC = () => {
     const form = useForm<CarFormDataType>({
         resolver: zodResolver(
             carSchema.refine(
-                (
-                    { matricula } //False para hacer la validación
-                ) => !isSpainMatricula || spainMatriculaRegex.test(matricula),
+                ({ matricula }) =>
+                    !isSpainMatricula || spainMatriculaRegex.test(matricula),
                 {
                     message: isSpainMatricula
                         ? "La matrícula debe ser válida para España (formato: 1234 BCD)"
@@ -74,6 +79,7 @@ const CrearCoche: React.FC = () => {
         ),
         defaultValues: {
             ...defaultValues,
+            cliente_id: preselectedClientId ?? defaultValues.cliente_id,
         },
     });
 
@@ -272,8 +278,11 @@ const CrearCoche: React.FC = () => {
                                         <Select
                                             onValueChange={field.onChange}
                                             defaultValue={field.value?.toString()}
+                                            disabled={Boolean(preselectedClientId)}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger
+                                                disabled={Boolean(preselectedClientId)}
+                                            >
                                                 <SelectValue placeholder="Selecciona el dueño" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -295,6 +304,11 @@ const CrearCoche: React.FC = () => {
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
+                                    {preselectedClientId && (
+                                        <FormDescription>
+                                            Fijado desde la creación del cliente
+                                        </FormDescription>
+                                    )}
                                     <FormMessage />
                                 </FormItem>
                             )}

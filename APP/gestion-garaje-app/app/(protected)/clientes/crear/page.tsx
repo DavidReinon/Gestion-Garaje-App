@@ -14,17 +14,24 @@ const CrearCliente: FC = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = async (data: ClientFormData) => {
+    const onSubmit = async (clientFormData: ClientFormData) => {
         setLoading(true);
         const payload: TablesInsert<"clientes"> = {
-            ...data,
-            fecha_entrada: formatToLocalTimeZoneString(data.fecha_entrada),
-            fecha_salida: data.fecha_salida
-                ? formatToLocalTimeZoneString(data.fecha_salida)
+            ...clientFormData,
+            fecha_entrada: formatToLocalTimeZoneString(
+                clientFormData.fecha_entrada
+            ),
+            fecha_salida: clientFormData.fecha_salida
+                ? formatToLocalTimeZoneString(clientFormData.fecha_salida)
                 : null,
         };
 
-        const { error } = await supabase.from("clientes").insert([payload]);
+        // Get inserted id and redirect with cliente_id
+        const { data: insertedData, error } = await supabase
+            .from("clientes")
+            .insert(payload)
+            .select("id")
+            .single();
 
         if (error) {
             console.error("Error al crear cliente:", error);
@@ -32,7 +39,12 @@ const CrearCliente: FC = () => {
             setLoading(false);
             return;
         }
-        router.push("/coches/crear");
+
+        router.push(
+            insertedData?.id
+                ? `/coches/crear?cliente_id=${insertedData.id}`
+                : "/coches/crear"
+        );
         alert("Cliente creado exitosamente.");
         setLoading(false);
     };
